@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 1: From First Light to First Frame</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header>
+  <h1>Dev Log 1: From First Light to First Frame</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+  </nav>
+</header>
+
+<main>
+
+  <section>
+    <h2>Part I — The Birth of the Beam</h2>
+    <p>RetroEngine started as a Direct3D 12 prototype with one goal: to simulate a cathode-ray tube not as a post-process effect, but as a physically modeled display system.</p>
+
+    <p>The first milestone was creating the world a CRT actually lives in the phosphor mask. I taught the GPU how to draw those microscopic red, green, and blue structures that sit beneath every pixel:</p>
+
+    <ul>
+      <li><strong>Shadow Mask:</strong> circular RGB triads like curved consumer televisions</li>
+      <li><strong>Aperture Grille:</strong> vertical RGB stripes used in Trinitron and broadcast PVM monitors</li>
+    </ul>
+
+    <p>Each pattern is generated procedurally in the shader (no textures, no lookup images). Every dot and stripe comes from math. This was where the renderer first felt alive: real-time phosphor geometry instead of static color blocks.</p>
+
+    <img src="../assets/images/log1_preview.jpg" alt="CRT phosphor mask close-up" style="max-width:90%;display:block;margin:2em auto;border-radius:8px;box-shadow:0 0 12px #00fff2;">
+  </section>
+
+  <section>
+    <h2>Part II — Teaching Light to Move</h2>
+    <p>Once the mask worked, I built the beam. A horizontal raster sweep now travels across the screen, lighting each phosphor as it passes. The shader models a Gaussian beam spread, scanline modulation, and a persistence buffer that fades over time.</p>
+
+    <ul>
+      <li>Gaussian + Lorentzian beam profile for soft edges without digital blur</li>
+      <li>Scanline animation so the image “draws itself” frame by frame</li>
+      <li>Afterglow persistence tuned per color channel</li>
+    </ul>
+
+    <p>For the first time, the renderer showed motion. Pixels glowed, trailed, and faded naturally. Running at 60 FPS, it was light behaving like matter.</p>
+  </section>
+
+  <section>
+    <h2>Part III — Persistence, Optics, and the Feeling of Glass</h2>
+    <p>With the beam alive, I re-architected the renderer into a two-pass temporal pipeline to model how CRTs build light over time.</p>
+
+    <p><strong>Pass A — Persistence Builder:</strong> combines new beam emission with decayed light stored in HDR ping-pong buffers. This simulates phosphor decay and temporal blending to prevent digital flicker.</p>
+    <p><strong>Pass B — Composite & Output:</strong> applies optical shaping: vignette falloff, phosphor weighting, gamma shaping, and tone mapping. A subtle diffusion pass mimics how light scatters through the glass faceplate.</p>
+
+    <p>After tuning the response:</p>
+    <ul>
+      <li>Dual-zone gamma (2.1 → 1.85) deepened blacks while keeping midtones luminous</li>
+      <li>Phosphor weighting balanced the warmth between green and red channels</li>
+      <li>Low-frequency diffusion added a faint analog bloom</li>
+    </ul>
+
+    <p>The result was the first time RetroEngine felt physical — deep contrast, smooth trails, and color that looked like energy rather than math.</p>
+  </section>
+
+  <section>
+    <h2>Part IV — The Mystery of the Muted Greens</h2>
+    <p>During a refactor, I finally found the bug that made every scene look flat. Textures were loaded as sRGB but sampled as linear UNORM, so the shader was reading gamma-encoded values. The CRT pass then applied its own shaping, and the GPU encoded again — effectively double darkening the image.</p>
+
+    <p>Fixing it meant rebuilding the color pipeline:</p>
+    <ul>
+      <li>Textures flagged as sRGB so the GPU linearizes automatically</li>
+      <li>CRT pass operates entirely in linear HDR (R16G16B16A16_FLOAT)</li>
+      <li>Swapchain performs a single sRGB encode at output</li>
+    </ul>
+
+    <p>Once fixed, the change was immediate. Greens came alive. Blues regained depth. The glow math behaved like real energy. The renderer finally felt unified from input to glass.</p>
+  </section>
+
+  <section>
+    <h2>Part V — The Cube Lives</h2>
+    <p>With the CRT system stable, I gave it something real to draw: a simple 3D cube. I added a camera, transform matrices, and a mesh loader. That cube became the first object rendered through the full beam and persistence pipeline.</p>
+
+    <ul>
+      <li>A geometry pass renders to an HDR buffer</li>
+      <li>The buffer feeds into the CRT system as its signal</li>
+      <li>The beam simulation, phosphor decay, and optical bloom process it in real time</li>
+    </ul>
+
+    <p>Watching that cube flicker through the simulated raster proved it. RetroEngine isn’t a filter. It’s a viewport model — a virtual CRT capable of showing real worlds.</p>
+
+    <!-- Optional short clip -->
+    <!--
+    <video controls autoplay muted loop style="max-width:90%;display:block;margin:2em auto;border-radius:8px;box-shadow:0 0 12px #00fff2;">
+      <source src="../assets/videos/log1_demo.mp4" type="video/mp4">
+    </video>
+    -->
+  </section>
+
+  <section class="summary">
+    <h2>Closing Thoughts</h2>
+    <p>This first stage was about one thing: light. Understanding it, shaping it, and making it behave the way it did on glass. The CRT system is alive now. Next up is giving that light a world to illuminate.</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2025 RetroEngine — Built by Alex Rybak</p>
+</footer>
+
+</body>
+</html>
