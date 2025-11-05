@@ -78,21 +78,43 @@
 </section>
 
   <section>
-    <h2>Part III — Persistence, Optics, and the Feeling of Glass</h2>
-    <p>With the beam alive, I re-architected the renderer into a two-pass temporal pipeline to model how CRTs build light over time.</p>
+  <h2>Part III — Persistence, Optics, and the Feeling of Glass</h2>
 
-    <p><strong>Pass A — Persistence Builder:</strong> combines new beam emission with decayed light stored in HDR ping-pong buffers. This simulates phosphor decay and temporal blending to prevent digital flicker.</p>
-    <p><strong>Pass B — Composite & Output:</strong> applies optical shaping: vignette falloff, phosphor weighting, gamma shaping, and tone mapping. A subtle diffusion pass mimics how light scatters through the glass faceplate.</p>
+  <p>Once the beam simulation came alive, the next step was to make it feel physical. Real CRTs don’t just draw a new image each frame; they blend light over time. A phosphor doesn’t stop glowing the instant the beam passes—it fades, mixes, and diffuses through glass. I rebuilt the renderer around that idea.</p>
 
-    <p>After tuning the response:</p>
-    <ul>
-      <li>Dual-zone gamma (2.1 → 1.85) deepened blacks while keeping midtones luminous</li>
-      <li>Phosphor weighting balanced the warmth between green and red channels</li>
-      <li>Low-frequency diffusion added a faint analog bloom</li>
-    </ul>
+  <p>The new pipeline runs in two temporal passes that model how energy accumulates on a screen:</p>
 
-    <p>The result was the first time RetroEngine felt physical — deep contrast, smooth trails, and color that looked like energy rather than math.</p>
-  </section>
+  <ul>
+    <li><strong>Pass A — Persistence Builder:</strong> merges new beam emission with decayed light from previous frames stored in HDR ping-pong buffers. This is what gives the display its sense of inertia—light that remembers.</li>
+    <li><strong>Pass B — Composite & Output:</strong> applies optical shaping: gamma curves, phosphor weighting, and a faint lens diffusion that mimics how light scatters inside a glass faceplate.</li>
+  </ul>
+
+  <p>After tuning the response, the image finally behaved like something behind glass:</p>
+
+  <ul>
+    <li>Dual-zone gamma shaping deepened shadows without crushing midtones</li>
+    <li>Phosphor weighting balanced warmth between the green and red channels</li>
+    <li>Soft low-frequency diffusion added the kind of analog bloom you only get from glass</li>
+  </ul>
+
+  <p>For the first time, RetroEngine felt less like a digital renderer and more like a physical device. Deep, film-like blacks replaced milky grays. Color started to carry energy instead of just hue. Motion left traces of light that looked alive.</p>
+
+  <div class="slideshow">
+  <div class="slide fade">
+    <img src="../assets/images/devlog01_04a.jpg" alt="CRT persistence test A">
+  </div>
+  <div class="slide fade">
+    <img src="../assets/images/devlog01_04b.jpg" alt="CRT persistence test B">
+  </div>
+  <div class="slide fade">
+    <img src="../assets/images/devlog01_04c.jpg" alt="CRT persistence test C">
+  </div>
+  <div class="slide fade">
+    <img src="../assets/images/devlog01_04d.jpg" alt="CRT persistence test D">
+  </div>
+</div>
+
+</section>
 
   <section>
     <h2>Part IV — The Mystery of the Muted Greens</h2>
