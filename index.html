@@ -1,36 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RetroEngine Dev Log</title>
-  <style>
-    body {
-      background: #0a0a0a;
-      color: #dcdcdc;
-      font-family: Consolas, monospace;
-      max-width: 900px;
-      margin: 2rem auto;
-      line-height: 1.6;
-    }
-    header {
-      border-bottom: 1px solid #333;
-      margin-bottom: 2rem;
-    }
-    h1 { color: #00ffc8; }
-    img, video { max-width: 100%; border-radius: 8px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>RetroEngine Dev Log</h1>
-    <p>Building a physically-accurate CRT renderer in DirectX 12.</p>
-  </header>
 
-  <h2>🧠 Entry #1 — Renderer Initialization</h2>
-  <p>Today I got the first D3D12 frame rendering. The swapchain is stable,
-  and I’m starting to add the CRT simulation stages.</p>
+<header>
+  <h1>RetroEngine</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+  </nav>
+</header>
 
-  <img src="https://placehold.co/800x450/000000/00ffc8?text=RetroEngine+First+Frame" alt="RetroEngine first frame">
+<main>
+  <section class="hero">
+    <h2>Rebuilding the Soul of CRTs</h2>
+    <p>RetroEngine is my passion project to recreate the look, feel, and physics of real CRT displays (beam scanning, phosphor glow, and analog life) entirely from scratch in DirectX 12. This isn’t a post-process filter; it’s a study of how light itself behaved on glass.</p>
+    <p>I'm documenting each stage of development as I build the renderer, simulate beam behavior, and reconstruct that nostalgic glow we all remember.</p>
+    <a href="/devlog/" class="button">View Dev Log</a>
+  </section>
+
+  <section class="about">
+    <h3>About the Creator</h3>
+    <p>Hey, I’m Alex, a technical artist, retro hardware obsessive, and the kind of person who still gets goosebumps from the warm flicker of a Trinitron. RetroEngine is my way of combining deep rendering research with a love of gaming history, to preserve that analog magic digitally — forever.</p>
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 RetroEngine — Built by Alex Rybak</p>
+</footer>
+
 </body>
 </html>
