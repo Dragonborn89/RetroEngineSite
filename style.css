@@ -113,3 +113,15 @@ footer {
   color: #5f7776;
   font-size: 14px;
 }
+
+/* --- Video Styling --- */
+video {
+  display: block;
+  max-width: 80%;              /* scales video to 80% of the content width */
+  height: auto;                /* keeps proper aspect ratio */
+  margin: 3em auto;            /* centers and adds breathing room */
+  border: 2px solid #00fff2;   /* subtle CRT-style border */
+  border-radius: 8px;
+  box-shadow: 0 0 20px #00fff2; /* glowing edge for CRT feel */
+  background-color: #000;      /* in case of letterboxing */
+}
