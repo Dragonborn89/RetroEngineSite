@@ -52,17 +52,30 @@
   </section>
 
   <section>
-    <h2>Part II — Teaching Light to Move</h2>
-    <p>Once the mask worked, I built the beam. A horizontal raster sweep now travels across the screen, lighting each phosphor as it passes. The shader models a Gaussian beam spread, scanline modulation, and a persistence buffer that fades over time.</p>
+  <h2>Part II — Teaching Light to Move</h2>
 
-    <ul>
-      <li>Gaussian + Lorentzian beam profile for soft edges without digital blur</li>
-      <li>Scanline animation so the image “draws itself” frame by frame</li>
-      <li>Afterglow persistence tuned per color channel</li>
-    </ul>
+  <p>When a CRT draws an image, it doesn’t show all the pixels at once. A focused electron beam scans across the screen, lighting up phosphors that glow and fade over time. The next milestone was teaching RetroEngine to do the same.</p>
 
-    <p>For the first time, the renderer showed motion. Pixels glowed, trailed, and faded naturally. Running at 60 FPS, it was light behaving like matter.</p>
-  </section>
+  <p>The renderer now simulates a moving scanline that excites each phosphor with brightness-dependent decay. Every pixel lives and fades on its own schedule, just like glass and light would behave in the real world.</p>
+
+  <ul>
+    <li><strong>Beam behavior and afterglow:</strong> the renderer now models a traveling raster sweep that excites phosphors with realistic decay.</li>
+    <li><strong>Real texture input:</strong> instead of test bars, RetroEngine now renders any image through the CRT pipeline.</li>
+    <li><strong>Physically-based blending:</strong> a Gaussian beam profile with nonlinear response gives each subpixel its own soft halo.</li>
+    <li><strong>Performance:</strong> running stable at 60 FPS with full control over mask type, pitch, scanline depth, and decay timing.</li>
+  </ul>
+
+  <p>For the first time, the renderer showed motion. Pixels glowed, trailed, and faded naturally, even though it was just a static image. It wasn’t just drawing color anymore—it was drawing <em>light</em>.</p>
+
+  <h3>The Comparison</h3>
+  <p>Below is the original test image I fed into the renderer, followed by the same frame viewed through the beam and phosphor simulation stage. It needs help, but every scanline and RGB triad is driven by the same math that powered real displays.</p>
+
+  <img src="../assets/images/devlog01_03.png" alt="Original test image used for CRT rendering">
+
+  <video controls autoplay muted loop>
+    <source src="../assets/videos/Texturerenderoutput.mp4" type="video/mp4">
+  </video>
+</section>
 
   <section>
     <h2>Part III — Persistence, Optics, and the Feeling of Glass</h2>
