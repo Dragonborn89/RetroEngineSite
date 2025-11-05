@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine Dev Log</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header>
+  <h1>RetroEngine Dev Log</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+  </nav>
+</header>
+
+<main>
+  <section class="intro">
+    <p>Follow the ongoing development of <strong>RetroEngine</strong> — a physically accurate CRT renderer built in DirectX 12.  
+    Each log explores the journey from raw beam simulation to a living, analog-inspired rendering engine.</p>
+  </section>
+
+  <section class="log-list">
+
+    <!-- Dev Log 1 -->
+    <article>
+      <h2><a href="entry1.html">🧠 Dev Log 1 — From First Light to First Frame</a></h2>
+      <p>
+        RetroEngine began as a blank D3D12 window, a personal experiment to see if a CRT could be simulated not as a filter, but as a physical system. Within the first week, that idea evolved into a functioning real-time display model, complete with beam scanning, phosphor decay, and color-accurate light response.
+      </p>
+
+      <p>
+        The renderer now reproduces real phosphor layouts, beam afterglow, and even a simple 3D scene — all rendered through a fully simulated CRT pipeline. This marks the foundation of RetroEngine’s goal: not imitation, but reconstruction of analog light.
+      </p>
+
+      <img src="../assets/images/log1_preview.jpg" alt="Preview of the first RetroEngine CRT render" style="max-width:90%; display:block; margin:2em auto; border-radius:8px; box-shadow:0 0 12px #00fff2;">
+      <a href="entry1.html" class="button">Read Full Log</a>
+    </article>
+
+    <!-- Future entries (copy and update for Dev Log 2, 3, etc.) -->
+    <!--
+    <article>
+      <h2><a href="entry2.html">⚙️ Dev Log 2 — Engine Architecture</a></h2>
+      <p>Adding scene management, camera systems, and multi-object rendering through the CRT persistence pipeline.</p>
+      <img src="../assets/images/log2_preview.jpg" alt="Engine architecture preview">
+      <a href="entry2.html" class="button">Read Full Log</a>
+    </article>
+    -->
+
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 RetroEngine — Built by Alex Rybak</p>
+</footer>
+
+</body>
+</html>
