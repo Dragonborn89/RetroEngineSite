@@ -150,11 +150,14 @@ section {
   border-radius: 8px;
   border: 2px solid #00fff2;
   box-shadow: 0 0 25px #00fff2;
+  aspect-ratio: 16 / 9; /* ensures the box keeps a video-like shape */
+  background-color: #000;
 }
 
 .slideshow img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;  /* fits full image without distortion */
   display: block;
   border-radius: 6px;
 }
@@ -162,6 +165,7 @@ section {
 .slide {
   position: absolute;
   width: 100%;
+  height: 100%;
   opacity: 0;
   animation: fade 16s infinite;
 }
@@ -179,7 +183,7 @@ section {
   100% { opacity: 0; }
 }
 
-/* Optional: pause animation when hovering */
+/* Pause on hover */
 .slideshow:hover .slide {
   animation-play-state: paused;
 }
