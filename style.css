@@ -136,3 +136,7 @@ img {
   box-shadow: 0 0 12px #00fff2;
   background-color: #000;
 }
+
+section {
+  margin-bottom: 3em;   /* adds vertical space between sections */
+}
