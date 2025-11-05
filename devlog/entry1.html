@@ -97,7 +97,7 @@
     <li>Soft low-frequency diffusion added the kind of analog bloom you only get from glass</li>
   </ul>
 
-  <p>For the first time, RetroEngine felt less like a digital renderer and more like a physical device. Deep, film-like blacks replaced milky grays. Color started to carry energy instead of just hue. Motion left traces of light that looked alive.</p>
+  <p>For the first time, RetroEngine felt less like a digital renderer and more like a physical device. Deep, film-like blacks replaced milky grays. Color started to carry energy instead of just hue. Motion left traces of light that looked alive. Here is a slideshow of some test textures I ran through it:</p>
 
   <div class="slideshow">
   <div class="slide fade">
@@ -128,11 +128,15 @@
     </ul>
 
     <p>Once fixed, the change was immediate. Greens came alive. Blues regained depth. The glow math behaved like real energy. The renderer finally felt unified from input to glass.</p>
+
+    <img src="../assets/images/devlog01_05a.jpg" alt="Original test image used for CRT rendering">
+    <img src="../assets/images/devlog01_05b.jpg" alt="Original test image used for CRT rendering">
+    <img src="../assets/images/devlog01_05c.jpg" alt="Original test image used for CRT rendering">
   </section>
 
   <section>
     <h2>Part V — The Cube Lives</h2>
-    <p>With the CRT system stable, I gave it something real to draw: a simple 3D cube. I added a camera, transform matrices, and a mesh loader. That cube became the first object rendered through the full beam and persistence pipeline.</p>
+    <p>With the CRT system stable, I gave it something real to draw: a simple 3D cube. I added a test scene with a camera, transform matrices, and a mesh loader. That cube became the first object rendered through the full beam and persistence pipeline.</p>
 
     <ul>
       <li>A geometry pass renders to an HDR buffer</li>
@@ -140,19 +144,18 @@
       <li>The beam simulation, phosphor decay, and optical bloom process it in real time</li>
     </ul>
 
+    <video controls loop autoplay muted>
+    <source src="../assets/videos/landingpage_demo.mp4" type="video/mp4">
+    </video>
+
     <p>Watching that cube flicker through the simulated raster proved it. RetroEngine isn’t a filter. It’s a viewport model — a virtual CRT capable of showing real worlds.</p>
 
-    <!-- Optional short clip -->
-    <!--
-    <video controls autoplay muted loop style="max-width:90%;display:block;margin:2em auto;border-radius:8px;box-shadow:0 0 12px #00fff2;">
-      <source src="../assets/videos/log1_demo.mp4" type="video/mp4">
-    </video>
-    -->
+    
   </section>
 
   <section class="summary">
     <h2>Closing Thoughts</h2>
-    <p>This first stage was about one thing: light. Understanding it, shaping it, and making it behave the way it did on glass. The CRT system is alive now. Next up is giving that light a world to illuminate.</p>
+    <p>This first stage was about one thing: light. Understanding it, shaping it, and making it behave the way it did on glass. The CRT system is alive now. Next up is giving that light a world to illuminate, moving beyond a simple test scene and expanding the engine's capability to support fully constructed worlds.</p>
   </section>
 
 </main>
