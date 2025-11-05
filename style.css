@@ -125,3 +125,14 @@ video {
   box-shadow: 0 0 20px #00fff2; /* glowing edge for CRT feel */
   background-color: #000;      /* in case of letterboxing */
 }
+
+/* --- Image Styling --- */
+img {
+  display: block;
+  max-width: 90%;
+  height: auto;
+  margin: 2em auto;
+  border-radius: 8px;
+  box-shadow: 0 0 12px #00fff2;
+  background-color: #000;
+}
