@@ -282,3 +282,17 @@ section {
   opacity: 0.75;
   margin-top: 0.5em;
 }
+
+/* --- Retro Counter --- */
+.retro-counter {
+  font-family: "Courier New", monospace;
+  font-size: 1.1em;
+  color: #00fff2;
+  background: rgba(0, 255, 242, 0.05);
+  border: 1px solid rgba(0, 255, 242, 0.3);
+  border-radius: 4px;
+  padding: 4px 10px;
+  display: inline-block;
+  box-shadow: 0 0 12px #00fff2;
+  margin-top: 0.5em;
+}

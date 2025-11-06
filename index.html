@@ -39,6 +39,22 @@
 <footer>
   <p>Contact at ContactRetroEngine@gmail.com</p>
   <p>© 2025 RetroEngine</p>
+
+  <p>Visitors: <span id="counter" class="retro-counter">Loading...</span></p>
+
+  <script>
+    // Fetch and increment visitor count
+    fetch('https://api.countapi.xyz/hit/retrogameengine.com/visits')
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById('counter').textContent =
+          res.value.toString().padStart(6, '0');
+      })
+      .catch(err => {
+        document.getElementById('counter').textContent = '000000';
+        console.error('Visitor counter failed:', err);
+      });
+  </script>
 </footer>
 
 </body>
