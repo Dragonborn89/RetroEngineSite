@@ -10,7 +10,7 @@ body {
 
 /* --- Layout Container (responsive) --- */
 main {
-  width: 80%;
+  width: 90%;
   max-width: 1800px;   /* expands gracefully up to 1200px on large screens */
   margin: 0 auto;
   padding: 2em;
