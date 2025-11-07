@@ -36,24 +36,19 @@
   </section>
 </main>
 
-<footer>
+<<footer>
   <p>Contact at ContactRetroEngine@gmail.com</p>
   <p>© 2025 RetroEngine</p>
 
-  <p>Visitors: <span id="counter" class="retro-counter">Loading...</span></p>
-
-  <script>
-    fetch('https://api.counterapi.dev/visitors/retroengine_visits')
-      .then(res => res.json())
-      .then(res => {
-        document.getElementById('counter').textContent =
-          res.data.toString().padStart(6, '0');
-      })
-      .catch(err => {
-        document.getElementById('counter').textContent = '000000';
-        console.error('Visitor counter failed:', err);
-      });
-  </script>
+  <p>
+    Visitors:
+    <a href="https://librecounter.org/referer/show" target="_blank">
+      <img src="https://librecounter.org/counter.svg"
+           referrerpolicy="unsafe-url"
+           alt="Visitor counter"
+           style="display:inline-block; vertical-align:middle;" />
+    </a>
+  </p>
 </footer>
 
 </body>
