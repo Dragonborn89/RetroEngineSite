@@ -22,7 +22,7 @@
   <section>
     <h2>Part I — Solid Ground</h2>
     <p>
-      After bringing the CRT system to life, I shifted focus to structure — how everything underneath it actually works. 
+      After bringing the CRT system to life, I shifted focus to structure. How everything underneath it actually works. 
       RetroEngine needed more than just a display; it needed a framework that could scale. 
       The goal was clear: build a clean, modular core that could render both 3D and 2D scenes through the same signal path.
     </p>
@@ -30,7 +30,7 @@
     <p>
       I introduced an ECS-style layout for all scene data, starting with <code>Components.h</code> for transforms and renderables, 
       <code>Material.h</code> for shading data, and <code>GpuMesh.h</code> to define how geometry lives on the GPU. 
-      It’s not a full ECS engine — just structured enough to keep data predictable and render paths isolated.
+      It’s not a full ECS engine, just structured enough to keep data predictable and render paths isolated.
     </p>
   </section>
 
@@ -39,7 +39,7 @@
     <p>
       The next step was verifying the math. The first procedural cube mesh finally rendered under 
       proper Blinn–Phong lighting, using inverse-transpose normal transforms for correct world-space shading. 
-      A simple test scene proved everything worked end-to-end — geometry buffers, camera transforms, 
+      A simple test scene proved everything worked end-to-end: geometry buffers, camera transforms, 
       constant buffers, and lighting all talking through DirectX 12.
     </p>
 
@@ -63,7 +63,7 @@
     </p>
 
     <ul>
-      <li>Pure DirectX 12 — no D2D or legacy interop</li>
+      <li>Pure DirectX 12 (no D2D or legacy interop)</li>
       <li>Orthographic camera for pixel-art accuracy</li>
       <li>Layered sprite system with parallax scrolling</li>
       <li>Shared HDR signal with the 3D renderer</li>
