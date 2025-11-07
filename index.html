@@ -43,12 +43,11 @@
   <p>Visitors: <span id="counter" class="retro-counter">Loading...</span></p>
 
   <script>
-    // Fetch and increment visitor count
-    fetch('https://api.countapi.xyz/hit/retrogameengine.com/visits')
+    fetch('https://api.counterapi.dev/visitors/retroengine_visits')
       .then(res => res.json())
       .then(res => {
         document.getElementById('counter').textContent =
-          res.value.toString().padStart(6, '0');
+          res.data.toString().padStart(6, '0');
       })
       .catch(err => {
         document.getElementById('counter').textContent = '000000';
