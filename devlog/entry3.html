@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 3: Parallax in Motion</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header>
+  <h1>Dev Log 3: Parallax in Motion</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+  <section>
+    <h2>Part I — A New Dimension for 2D</h2>
+    <p>
+      In just a few days, RetroEngine took a major step forward.  
+      The engine can now render true 2D parallax scenes, built entirely on its custom DirectX 12 renderer and running through the same HDR signal path as the 3D stage.
+    </p>
+
+    <p>
+      This isn’t just a visual feature. It’s the first proof that RetroEngine’s rendering core can support a full 2D pipeline — modular, efficient, and deeply tied into the CRT simulation.  
+      Every pixel is treated as light, not color data, which means the behavior of the image is physically modeled from input to glass.
+    </p>
+  </section>
+
+  <section>
+    <h2>Part II — Inside the Sprite Renderer</h2>
+    <p>
+      The new <code>SpriteRenderer2D</code> runs directly on the engine’s HDR target.  
+      Each layer in the scene is defined through a <code>SpriteLayer</code> structure that holds a texture reference, a parallax ratio, and GPU descriptors for rendering.
+    </p>
+
+    <p>
+      Layers scroll independently and wrap seamlessly, creating the classic multi-plane effect seen in SNES and Genesis games.  
+      A lightweight <code>SpriteCamera</code> manages motion, while the renderer handles batching, alpha blending, and synchronization with the CRT pipeline.  
+      Everything is built to scale: future sprites, UI, and full 2D levels will use this same system. The focus here wasn't so much on the art, but the underlying systems. To that end, I got some quick test art in to proof it all out.
+    </p>
+
+    <video controls autoplay muted loop>
+      <source src="../assets/videos/devlog03_01.mp4" type="video/mp4">
+    </video>
+  </section>
+
+  <section>
+    <h2>Part III — The Soul of Retro</h2>
+    <p>
+      Seeing the scene finally scroll was a moment of clarity.  
+      The layers drift across the screen with natural parallax, moving through the same simulated phosphor glow that defines the 3D render path.  
+      There’s something timeless about it, the same illusion of depth that once made pixel art feel infinite.
+    </p>
+
+    <video controls autoplay muted loop>
+      <source src="../assets/videos/devlog03_02.mp4" type="video/mp4">
+    </video>
+
+    <p>
+      This milestone was hard-earned. Debugging, testing, and refining the DirectX 12 state transitions took time, but the payoff was worth it.  
+      For the first time, RetroEngine doesn’t just render an image. It renders motion.
+    </p>
+  </section>
+
+  <section class="summary">
+    <h2>Closing Thoughts</h2>
+    <p>
+      The addition of SpriteRenderer2D transforms RetroEngine into a hybrid system, equally capable of handling 3D environments and 2D scenes within the same physically simulated pipeline.  
+      This modular foundation sets the stage for everything ahead: an editor, layered worlds, and full gameplay systems rendered through CRT glass.
+    </p>
+
+    <p>
+      Next up: starting the process of the first editor features. No more hard-coded tests, instead I want to be able to start configuring things through a user-facing editor. 
+    </p>
+
+    <video controls autoplay muted loop>
+      <source src="../assets/videos/devlog03_03.mp4" type="video/mp4">
+    </video>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2025 RetroEngine</p>
+</footer>
+
+</body>
+</html>
