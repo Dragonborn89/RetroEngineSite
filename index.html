@@ -6,6 +6,20 @@
 <title>RetroEngine</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
+<script>
+  const startDate = new Date("October 31, 2025");
+
+  function updateSiteAge() {
+    const today = new Date();
+    const diffTime = today - startDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    document.getElementById("site-age-value").textContent = diffDays;
+  }
+
+  updateSiteAge();
+</script>
+
 <body>
 
 <header>
@@ -19,6 +33,7 @@
 
 <main>
   <section class="hero">
+    <p class="site-age">RetroEngine is <span id="site-age-value"></span> days old.</p>
     <h2>Rebuilding the Soul of CRTs</h2>
     <p>RetroEngine is my passion project to recreate the look, feel, and physics of real CRT displays (beam scanning, phosphor glow, and analog life) entirely from scratch in DirectX 12. This isn’t a post-process filter; it’s a study of how light itself behaved on glass.</p>
     <p>I'm documenting each stage of development as I build the renderer, simulate beam behavior, and reconstruct that nostalgic glow we all remember.</p>

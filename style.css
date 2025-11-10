@@ -296,3 +296,14 @@ section {
   box-shadow: 0 0 12px #00fff2;
   margin-top: 0.5em;
 }
+
+/* --- RetroEngine Age Counter --- */
+.site-age {
+  font-family: "Courier New", monospace;
+  font-size: 0.95rem;
+  color: #6fffd3; /* same neon mint as headings/links */
+  text-shadow: 0 0 6px #00fff2; /* subtle CRT glow */
+  opacity: 0.9;
+  margin-top: -1.5em;  /* pulls it visually closer to the header */
+  margin-bottom: 1.5em;
+}
