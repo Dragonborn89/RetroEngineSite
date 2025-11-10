@@ -11,7 +11,7 @@ body {
 /* --- Layout Container (responsive) --- */
 main {
   width: 95%;
-  max-width: 1800px;   /* expands gracefully up to 1200px on large screens */
+  max-width: 1800px;   /* expands gracefully up to 1800px on large screens */
   margin: 0 auto;
   padding: 2em;
   box-sizing: border-box;
@@ -300,10 +300,10 @@ section {
 /* --- RetroEngine Age Counter --- */
 .site-age {
   font-family: "Courier New", monospace;
-  font-size: 0.95rem;
+  font-size: 1.5rem;
   color: #6fffd3; /* same neon mint as headings/links */
   text-shadow: 0 0 6px #00fff2; /* subtle CRT glow */
-  opacity: 0.9;
+  opacity: 0.95;
   margin-top: -1.5em;  /* pulls it visually closer to the header */
   margin-bottom: 1.5em;
 }
