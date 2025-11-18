@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 4: The Editor Takes Shape</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header>
+  <h1>Dev Log 4: The Editor Takes Shape</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ========================================================= -->
+  <!--  PART I — Laying the Foundations of the RetroEngine Editor -->
+  <!-- ========================================================= -->
+  <section>
+    <h2>Part I — Laying the Foundations of the RetroEngine Editor</h2>
+    <p>
+      In the last few weeks, RetroEngine evolved from a rendering sandbox into the early
+      shape of a real engine. The biggest leap: the arrival of the <strong>first proper editor</strong>.
+      Powered by the ImGui docking branch, the editor now lives directly inside RetroEngine’s
+      runtime, giving me live, real-time control over content, scenes, and CRT parameters.
+    </p>
+
+    <p>
+      What began as a debug pane is becoming a full authoring environment. Windows can be
+      rearranged, docked, floating, or snapped into custom layouts, and every control reflects the
+      engine’s state instantly. No rebuilding. No restarts. No text file hacks.
+    </p>
+
+    <!-- IMAGE PLACEHOLDER -->
+    <figure>
+      <img src="../assets/images/devlog04_editor_overview.png" alt="RetroEngine Editor UI Overview">
+      <figcaption>The first real RetroEngine Editor window, powered by ImGui’s docking system.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ========================================================= -->
+  <!--  PART II — Scene Editing Comes Alive                      -->
+  <!-- ========================================================= -->
+  <section>
+    <h2>Part II — Scene Editing Comes Alive</h2>
+    <p>
+      The parallax system introduced last log has now been fully exposed through the editor.
+      Instead of hard-coded layers, RetroEngine now supports:
+    </p>
+
+    <ul>
+      <li>Renaming scenes (UTF-8 aware)</li>
+      <li>Adding and removing layers on the fly</li>
+      <li>Editing parallax ratios with instant GPU updates</li>
+      <li>Real-time scene reloading without any Apply button</li>
+      <li>A fully working JSON-based save/load pipeline</li>
+    </ul>
+
+    <p>
+      Clicking, dragging, or typing in a field updates the scene immediately and the renderer
+      rebuilds textures, descriptor heaps, and GPU bindings in real time. The editor isn’t just
+      reflecting the engine anymore; it’s driving it.
+    </p>
+
+    <!-- VIDEO PLACEHOLDER -->
+    <video controls autoplay muted loop>
+      <source src="../assets/videos/devlog04_live_scene_editing.mp4" type="video/mp4">
+    </video>
+
+    <p>
+      This makes RetroEngine feel dramatically different. I'm shaping a scene, 
+      adjusting it, and watching the layers glide in the CRT pipeline as I tweak them.
+    </p>
+  </section>
+
+  <!-- ========================================================= -->
+  <!--  PART III — The Import Pipeline                           -->
+  <!-- ========================================================= -->
+  <section>
+    <h2>Part III — The New Texture Import Pipeline</h2>
+    <p>
+      One of the biggest technical challenges was asset handling. Debug builds, release builds,
+      absolute paths, missing folders, WIC decoding failures exposed every fragile assumption.
+      The solution was to build a proper asset pipeline.
+    </p>
+
+    <p>
+      RetroEngine now supports a safe, predictable import flow:
+    </p>
+
+    <ul>
+      <li>Select any PNG on your machine</li>
+      <li>The editor validates the file and copies it into an <code>Assets/Imported/</code> directory</li>
+      <li>Both Debug and Release builds auto-create this folder if needed</li>
+      <li>Relative paths are generated automatically for JSON scenes</li>
+      <li>The editor reloads the scene instantly after import</li>
+    </ul>
+
+    <p>
+      This was a foundational fix. Texture loading is now unbreakable, predictable, and fully
+      decoupled from your machine’s file structure.
+    </p>
+
+    <!-- IMAGE PLACEHOLDER -->
+    <figure>
+      <img src="../assets/images/devlog04_import_dialog.png" alt="Texture Import Dialog">
+      <figcaption>Importing a PNG directly into RetroEngine’s project structure.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ========================================================= -->
+  <!--  PART IV — JSON Scenes That Actually Work                 -->
+  <!-- ========================================================= -->
+  <section>
+    <h2>Part IV — JSON Scenes That Actually Work</h2>
+    <p>
+      The original key-value format for parallax scenes has now been replaced with a clean,
+      structured JSON layout. Saving and loading scenes works reliably, no silent failure, no path
+      confusion, no formatting quirks.
+    </p>
+
+    <p>
+      Every scene stores:
+    </p>
+
+    <ul>
+      <li>Scene name</li>
+      <li>Layer count</li>
+      <li>Texture paths (relative)</li>
+      <li>Parallax values</li>
+    </ul>
+
+    <!-- CODE SNIPPET (IMAGE OR BLOCK) -->
+    <pre><code>{
+  "SceneName": "Mountains",
+  "Layers": [
+    { "Texture": "Assets/Imported/layer01.png", "Parallax": 0.10 },
+    { "Texture": "Assets/Imported/layer02.png", "Parallax": 0.30 }
+  ]
+}
+    </code></pre>
+
+    <p>
+      RetroEngine now boots from a JSON file, reloads scenes from it, and allows you to save new
+      ones directly from the editor. This is the backbone for future level authoring tools.
+    </p>
+  </section>
+
+  <!-- ========================================================= -->
+  <!--  PART V — Stability, Reliability, and The Dirty Work      -->
+  <!-- ========================================================= -->
+  <section>
+    <h2>Part V — Stability, Reliability, and the Dirty Work</h2>
+    <p>
+      Several deep engine issues surfaced while building the editor — and solving them made the
+      engine far more robust:
+    </p>
+
+    <ul>
+      <li>A persistent WIC decoding error caused by invalid absolute paths</li>
+      <li>Descriptor heaps being destroyed while command lists still referenced them</li>
+      <li>Debug/Release builds resolving Assets differently</li>
+      <li>Silent scene-saving failures caused by path formatting differences</li>
+      <li>GPU sync issues during live scene updates</li>
+    </ul>
+
+    <p>
+      All of these are now fixed, replaced with predictable behavior and detailed logging. The
+      engine finally feels stable — something you can build real tools and workflows on top of.
+    </p>
+
+    
+  </section>
+
+  <!-- ========================================================= -->
+  <!--  SUMMARY & WHAT’S NEXT                                    -->
+  <!-- ========================================================= -->
+  <section class="summary">
+    <h2>Closing Thoughts</h2>
+    <p>
+      This dev log marks a clear turning point. RetroEngine now has a working editor,
+      a functioning import pipeline, a robust asset system, JSON scene support, and fully
+      interactive parallax tools, all woven directly into the CRT simulation workflow.
+    </p>
+
+    <p>
+      The engine is no longer just drawing scenes.  
+      <strong>It’s authoring them.</strong>
+    </p>
+
+    <p>
+      Next up: The start of a full scene graph and tileset editor...
+      the features that will turn this editor into a proper retro game toolkit.
+    </p>
+
+    <!-- VIDEO PLACEHOLDER -->
+    <video controls autoplay muted loop>
+      <source src="../assets/videos/devlog04_editor_scrollthrough.mp4" type="video/mp4">
+    </video>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2025 RetroEngine</p>
+</footer>
+
+</body>
+</html>
