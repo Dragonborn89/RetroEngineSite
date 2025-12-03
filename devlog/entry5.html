@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 5: Sprites, Meshes, and The Great Sorting Adventure</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 5: Sprites, Meshes, and The Great Sorting Adventure</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- ========================================================= -->
+<!--  SECTION 1 — A Very Honest Start                           -->
+<!-- ========================================================= -->
+<section>
+  <h2>Getting Real About This Update</h2>
+
+  <p>
+    This stretch of development was a weird mix of exciting and humbling. I finally pushed the 
+    engine far enough that all the little shortcuts I’d been getting away with came back and 
+    demanded attention. The moment I added more meshes and started moving them around, it became 
+    painfully obvious that depth sorting just wasn’t a thing. New objects always drew on top. 
+    Didn’t matter where they were in the world — if they were born last, they ruled the scene.
+  </p>
+
+  <p>
+    That kicked off a whole chain of fixes: sorting, transparency, per-entity materials, 
+    per-entity sprite textures, and cleaning up the constant buffer system. Honestly, I felt like 
+    I was stumbling around in a dark room looking for the light switch. I’d bump into something, 
+    swear a little, try again, and eventually the room started to take shape.  
+  </p>
+</section>
+
+<!-- ========================================================= -->
+<!--  SECTION 2 — Per-Entity Materials (and Growing Pains)      -->
+<!-- ========================================================= -->
+<section>
+  <h2>Per-Entity Materials Without Bleeding</h2>
+
+  <p>
+    One of the big lessons I learned: <strong>materials need their own space</strong>.  
+    Early on, every cube and sprite was sharing the same constant buffer slot. So if you changed 
+    the color on one cube, everything else changed too. It was funny the first time. Then it got 
+    old really fast.
+  </p>
+
+  <p>
+    The fix was simple in concept, but took me awhile to really internalize: every entity gets 
+    its own aligned spot in the constant buffer. That means transforms, materials, and sprite data 
+    all have independent offsets. Suddenly, modifying one cube didn’t yank the rug out from under 
+    the others.
+  </p>
+
+  <figure>
+    <video controls autoplay muted loop>
+      <source src="../assets/videos/devlog05_materials.mp4" type="video/mp4">
+    </video>
+    <figcaption>Changing colors on cubes independently, plus selecting different textures for sprites.</figcaption>
+  </figure>
+</section>
+
+<!-- ========================================================= -->
+<!--  SECTION 3 — The Sprite System Grows Up                    -->
+<!-- ========================================================= -->
+<section>
+  <h2>Per-Entity Sprite Textures</h2>
+
+  <p>
+    Sprites originally lived in that “just make it work” category. One texture for everything, 
+    no questions asked. That obviously fell apart once I started giving each sprite its own identity.
+  </p>
+
+  <p>
+    Now every sprite gets its own SRV in a dedicated heap, with proper allocation and tracking. 
+    You can import textures, assign them per sprite, and nothing conflicts. This was one of those 
+    “finally…” moments.
+  </p>
+</section>
+
+<!-- ========================================================= -->
+<!--  SECTION 4 — Depth Sorting Actually Works                  -->
+<!-- ========================================================= -->
+<section>
+  <h2>Depth Sorting That Respects Reality</h2>
+
+  <p>
+    The biggest visual improvement came from finally tackling transparency and sorting.  
+    Before, everything just rendered in creation order, which meant sprites could end up in 
+    front of cubes even if they were miles behind. Transparent edges cut literal holes into other 
+    objects. Depth writes were wrong, depth tests were wrong… everything was wrong.
+  </p>
+
+  <p>
+    The fix involved drawing opaque geometry first, turning off depth writes for sprites, and 
+    sorting sprites back-to-front every frame. It’s not glamorous, but it works, and it feels 
+    like a proper game engine now.
+  </p>
+
+  <figure>
+    <video controls autoplay muted loop>
+      <source src="../assets/videos/devlog05_sorting.mp4" type="video/mp4">
+    </video>
+    <figcaption>Moving cubes and sprites around the world, with correct depth sorting.</figcaption>
+  </figure>
+</section>
+
+<!-- ========================================================= -->
+<!--  SECTION 5 — Slowing Down to Speed Up                      -->
+<!-- ========================================================= -->
+<section>
+  <h2>Breaking Things Down, Slowing Down</h2>
+
+  <p>
+    The real turning point wasn’t a single line of code, it was accepting that I needed to slow 
+    down. I usually like to build fast and let the pieces fall into place later, but that wasn’t 
+    cutting it here. So I refactored. Cleaned up the flow of data. Made sure I understood every 
+    step instead of just hoping it worked.
+  </p>
+
+  <p>
+    And once I did that, everything clicked into place. Materials behaved. Sprites behaved. 
+    Sorting behaved. It all felt less like fighting the engine and more like collaborating with it.
+  </p>
+</section>
+
+<!-- ========================================================= -->
+<!--  SECTION 6 — What’s Next                                   -->
+<!-- ========================================================= -->
+<section>
+  <h2>Next Steps</h2>
+
+  <p>
+    With the rendering side finally stabilizing, I can start pushing into more interesting 
+    editor features. Things like:
+  </p>
+
+  <ul>
+    <li>A proper outliner for selecting entities</li>
+    <li>Better material editing tools</li>
+    <li>Hierarchy and parenting</li>
+    <li>Smarter sprite workflows</li>
+  </ul>
+
+  <p>
+    But really, the big takeaway this month was that the engine is growing into something 
+    comfortable to work inside. Moving objects around, changing colors, swapping textures, it 
+    all feels natural now. That’s a huge milestone.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2025 RetroEngine</p>
+</footer>
+
+</body>
+</html>
