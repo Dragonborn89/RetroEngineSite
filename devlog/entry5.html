@@ -32,7 +32,7 @@
     engine far enough that all the little shortcuts I’d been getting away with came back and 
     demanded attention. The moment I added more meshes and started moving them around, it became 
     painfully obvious that depth sorting just wasn’t a thing. New objects always drew on top. 
-    Didn’t matter where they were in the world — if they were born last, they ruled the scene.
+    Didn’t matter where they were in the world...if they were born last, they ruled the scene.
   </p>
 
   <p>
@@ -85,7 +85,7 @@
   <p>
     Now every sprite gets its own SRV in a dedicated heap, with proper allocation and tracking. 
     You can import textures, assign them per sprite, and nothing conflicts. This was one of those 
-    “finally…” moments.
+    “finally” moments where things started to click and I could visualize the progress.
   </p>
 </section>
 
@@ -106,6 +106,10 @@
     The fix involved drawing opaque geometry first, turning off depth writes for sprites, and 
     sorting sprites back-to-front every frame. It’s not glamorous, but it works, and it feels 
     like a proper game engine now.
+  </p>
+
+  <p>
+    Another nice touch I wanted to call out, was you get the classic CRT after-image of phosphor decay magic as you move items around in the scene, even while in editor mode. I thought it was a cool proof of the underlying render process as well.
   </p>
 
   <figure>
@@ -147,14 +151,13 @@
   </p>
 
   <ul>
-    <li>A proper outliner for selecting entities</li>
     <li>Better material editing tools</li>
     <li>Hierarchy and parenting</li>
     <li>Smarter sprite workflows</li>
   </ul>
 
   <p>
-    But really, the big takeaway this month was that the engine is growing into something 
+    But really, the big takeaway these past couple weeks was that the engine is growing into something 
     comfortable to work inside. Moving objects around, changing colors, swapping textures, it 
     all feels natural now. That’s a huge milestone.
   </p>
