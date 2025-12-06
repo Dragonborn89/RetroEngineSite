@@ -137,6 +137,32 @@
   <p class="preview-note">This is just a short summary — click above to read the full log.</p>
 </article>
 
+<!-- Dev Log 6 -->
+<article>
+  <h2>
+    <a href="entry6.html">🚀 Dev Log 6 — Lighting, Materials, Mesh Importing & The CRT Reality Check</a>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    This update pulled RetroEngine out of the prototype phase and into real rendering territory.
+    Albedo textures now work across the entire engine, a proper lighting system is in place 
+    (directional + ambient), emissive behaves like the hardware that inspired the project, and the 
+    editor can import real OBJ models end-to-end.
+  </p>
+
+  <p>
+    The CRT pass exposed tiny shading issues that the raw framebuffer completely hid, and fixing 
+    them led to one of the most satisfying wins so far: importing a full spaceship model and having 
+    it light correctly on the first good compile. A three-line bug in the OBJ importer was the final 
+    boss, and once it fell, everything clicked into place.
+  </p>
+
+  <img src="../assets/devlog/06/ship_final01.png" alt="First successfully imported ship in RetroEngine with lighting and CRT">
+  <a href="entry6.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
 </section>
 </main>
 

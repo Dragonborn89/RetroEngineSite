@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 6. Lighting, Materials, Mesh Importing and the CRT Reality Check</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 6. Lighting, Materials, Mesh Importing and the CRT Reality Check</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- SECTION 1 -->
+<section>
+  <h2>Dragging RetroEngine Out Of The Void</h2>
+
+  <p>
+    This update started simple: let’s get real lighting and real textures into the 3D renderer.
+    Nothing fancy, just enough to stop staring at blank cubes drifting in empty space.
+  </p>
+
+  <p>
+    Of course it wasn’t that easy. Everything fought me. But RetroEngine finally broke out of the 
+    placeholder phase and into something that feels like a real rendering pipeline.
+  </p>
+
+<!-- SECTION 2 -->
+<section>
+  <h2>Albedo Textures, For Real This Time</h2>
+
+  <p>
+    Up until now, 3D entities in the engine were just tinted cubes. You could rename objects, move them,
+    duplicate them… and visually none of it mattered too much. They all looked nearly identical.
+  </p>
+
+  <p>
+    So the engine now supports <strong>actual albedo textures</strong>. The editor can browse and pick
+    images, the renderer loads them the first time they’re needed, and each texture lands in a 
+    globally-managed SRV heap.
+  </p>
+
+  <p>
+    If you’re not deep into rendering work: an SRV heap is basically a giant GPU-side index of
+    textures and resources. Without one, every draw call becomes a scramble to bind textures. With
+    a global heap, everything is predictable, fast, and works nicely with my editor and scene
+    system. It's the backbone of how modern DirectX works, and now RetroEngine has a clean version
+    of it.
+  </p>
+
+  <img src="../assets/images/albedo_on_cubes.png" class="devimg">
+
+  <img src="../assets/images/albedo_on_cubes02.png" class="devimg">
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <h2>Lighting That Fits The Retro Mindset</h2>
+
+  <p>
+    The lighting system finally exists, and it’s exactly the kind of simple that this engine needs.
+    We have:
+  </p>
+
+  <ul>
+    <li>a directional light with adjustable <strong>direction</strong>, <strong>intensity</strong>, and <strong>color</strong></li>
+    <li>an <strong>ambient light level</strong> that acts as the global “fill” so nothing ever drops into pure black</li>
+  </ul>
+
+  <p>
+    It’s basic Lambert shading, the stuff you saw everywhere before PBR took over. And honestly it fits the CRT pipeline better than anything more advanced would right now.
+  </p>
+
+  <img src="../assets/images/lighting_on_cubes.png" class="devimg">
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <h2>Emissive That Behaves Like 90s Hardware</h2>
+
+  <p>
+    Emissive is officially in. And instead of acting like a modern bloom-heavy highlight, it behaves
+    exactly like older console hardware: emissive pixels are simply bright. No glow radius, no fancy
+    post-processing, no bleeding into neighboring surfaces.
+  </p>
+
+  <p>
+    A lot of retro games relied on this look—bright pixels in a dark scene—and the CRT pipeline
+    picks it up beautifully.
+  </p>
+</section>
+
+<!-- SECTION 5 -->
+<section>
+  <h2>Materials Trimmed Down To What Matters</h2>
+
+  <p>
+    The material system is intentionally simple right now. We support:
+  </p>
+
+  <ul>
+    <li>baseColor</li>
+    <li>optional albedo texture</li>
+    <li>optional emissive</li>
+    <li>Lamber-style lighting</li>
+  </ul>
+
+  <p>
+    The plan is to explore how (or if) roughness and metalness belong in a retro-flavored engine instead of blindly copying modern shading models.
+  </p>
+</section>
+
+<!-- SECTION 6 -->
+<section>
+  <h2>The CRT Shader Became An Accidental Debugger</h2>
+
+  <p>
+    Once lighting went in, the CRT mask started revealing problems the raw framebuffer completely
+    hid on 3D meshes: slightly broken normals, subtle seams, and incorrect shading transitions.
+  </p>
+
+  <p>
+    The CRT pass exaggerates shading enough that it basically turned into a diagnostic tool. It was
+    showing me exactly where something in the pipeline wasn’t behaving.
+  </p>
+
+  <img src="../assets/images/crt_debugging.png" class="devimg">
+</section>
+
+<!-- SECTION 7 -->
+<section>
+  <h2>OBJ Importing: The Highs, The Lows, The Inside-Out Horror</h2>
+
+  <p>
+    A big milestone: the engine can now import OBJ models <strong>through the editor itself</strong>.
+    Pick an OBJ, assign it to a mesh entity, and the rest of the engine (materials, transforms,
+    lighting, CRT) just works.
+  </p>
+
+  <p>
+    Getting there was… a journey.
+  </p>
+
+  <p>
+    When I imported the first spaceship model (from an older game of mine, <em>The Quantum
+    Conflict</em>) the entire mesh rendered inside-out. I could literally see the backfaces through 
+    the model. Maya showed perfectly outward-facing normals, but the engine saw the exact opposite.
+  </p>
+
+  <img src="../assets/images/obj_insideout.png" class="devimg">
+
+  <p>
+    After chasing depth, normals, culling, transforms—everything, the problem turned out to be a
+    single flawed assumption in my importer. I was “fixing” triangle winding for DirectX… even
+    though the triangles were already correct.
+  </p>
+
+  <pre>
+Before:
+    indices.push_back(i0);
+    indices.push_back(i2);
+    indices.push_back(i1);
+
+After:
+    indices.push_back(i0);
+    indices.push_back(i1);
+    indices.push_back(i2);
+  </pre>
+
+  <p>
+    Three lines. Hours of confusion. And the second I fixed it, the ship popped into place perfectly.
+    Lighting behaved, the CRT pass behaved, everything behaved.
+  </p>
+</section>
+
+<!-- SECTION 8 -->
+<section>
+  <h2>The First Real Imported Mesh</h2>
+
+  <p>
+    Seeing a real ship model rendered correctly in RetroEngine, with albedo textures and lighting
+    active, was the moment this whole project finally felt like a real engine. Not a prototype. A
+    functioning, extensible pipeline.
+  </p>
+
+  <img src="../assets/images/01.png" class="devimg">
+
+  <img src="../assets/images/02.png" class="devimg">
+</section>
+
+<!-- SECTION 9 -->
+<section>
+  <h2>Where The Engine Stands Now</h2>
+
+  <ul>
+    <li>Full OBJ importing integrated into the editor</li>
+    <li>Correct normals, correct winding, correct shading</li>
+    <li>Working albedo textures</li>
+    <li>A global SRV heap managing all textures cleanly</li>
+    <li>Lambert lighting with directional + ambient controls</li>
+    <li>Emissive support</li>
+    <li>A CRT pass that ties it all together</li>
+  </ul>
+</section>
+
+<!-- SECTION 10 -->
+<section>
+  <h2>What Comes Next</h2>
+
+  <p>
+    The next milestones should revolve around expanding the engine framework itself:
+  </p>
+
+  <ul>
+    <li>scene saving/loading (JSON or binary)</li>
+    <li>half-Lambert shading for softer highlights</li>
+    <li>blob shadows</li>
+    <li>retro-style specular</li>
+    <li>material presets</li>
+    <li>expanded mesh importing (MTL, multi-material)</li>
+  </ul>
+
+  <p>
+    This update took longer than expected, but it brought the engine to a point where building
+    worlds inside it finally feels possible. The tech and the tools are starting to line up.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2025 RetroEngine</p>
+</footer>
+
+</body>
+</html>
