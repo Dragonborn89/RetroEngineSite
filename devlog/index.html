@@ -163,6 +163,31 @@
   <p class="preview-note">This is just a short summary — click above to read the full log.</p>
 </article>
 
+<!-- Dev Log 7 -->
+<article>
+  <h2>
+    <a href="entry7.html">📦 Dev Log 7 — Scenes, State, and the Cost of Ownership</a>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    RetroEngine now supports full 3D scene saving and loading. Entities, meshes, materials,
+    textures, and transforms serialize cleanly to disk and can be reloaded through the editor.
+    This marks the transition from a live rendering sandbox to a real world-authoring tool.
+  </p>
+
+  <p>
+    Getting there exposed a subtle but critical engine bug. Loading a second scene reliably
+    crashed the engine, not due to leaks, but due to incorrect ownership boundaries between
+    the editor and renderer. Fixing that architectural flaw stabilized multi-scene loading
+    and laid the groundwork for future features like cameras and per-scene lighting.
+  </p>
+
+  <img src="../assets/images/editor_scene_overview.png" alt="RetroEngine editor scene overview">
+  <a href="entry7.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
 </section>
 </main>
 

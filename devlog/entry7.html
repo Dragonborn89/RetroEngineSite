@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 7. Scenes, State, and the Cost of Ownership</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 7: Scenes, State, and the Cost of Ownership</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- SECTION 1 -->
+<section>
+  <h2>From Rendering Objects To Building Worlds</h2>
+
+  <p>
+    Up through the last dev log, RetroEngine could render things — cubes, meshes, sprites,
+    textures, lighting, all of it worked great. But everything lived in the moment.
+  </p>
+
+  <p>
+    You could place objects, tweak materials, move them around… and the second you closed
+    the app, it was all gone.
+  </p>
+
+  <p>
+    That was fine early on to proof things out. But it also meant the editor wasn’t really an editor yet.
+    It was a sandbox.
+  </p>
+
+  <p>
+    This update is about the line RetroEngine crossed next: moving from rendering individual
+    objects to authoring actual <em>scenes</em>.
+  </p>
+</section>
+
+<!-- SECTION 2 -->
+<section>
+  <h2>What A “Scene” Means In RetroEngine</h2>
+
+  <p>
+    A scene is the missing layer between raw rendering and world-building.
+    It represents a complete snapshot of:
+  </p>
+
+  <ul>
+    <li>a collection of entities</li>
+    <li>their transforms</li>
+    <li>their meshes</li>
+    <li>their materials and textures</li>
+  </ul>
+
+  <p>
+    Scenes serialize cleanly to disk as <code>.scene.json</code> files and can be loaded
+    back into the engine through the editor.
+  </p>
+
+  <p>
+    This is where RetroEngine stopped being “a renderer with UI” and started behaving
+    like a real engine.
+  </p>
+
+  <img src="../assets/images/editor_scene_overview.png" class="devimg">
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <h2>The Editor Finally Has Memory</h2>
+
+  <p>
+    Once scenes were in place, the editor workflow changed immediately.
+  </p>
+
+  <p>
+    You can now:
+  </p>
+
+  <ul>
+    <li>add entities</li>
+    <li>assign meshes and textures</li>
+    <li>adjust transforms and materials</li>
+    <li>save the entire scene to disk</li>
+    <li>reload it later exactly as you left it</li>
+  </ul>
+
+  <p>
+    That single ability, adding save states, completely changes how the engine feels to use.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/scene_create_and_save.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <h2>Then I Tried Loading A Second Scene</h2>
+
+  <p>
+    The first scene loaded perfectly.
+  </p>
+
+  <p>
+    The second one crashed the engine.
+  </p>
+
+  <p>
+    Every time.
+  </p>
+
+  <p>
+    The error looked like a classic memory failure: <code>std::bad_alloc</code>,
+    D3D12 warnings, GPU resources being allocated again and again.
+  </p>
+
+  <p>
+    On paper, it looked like a leak.
+    In reality, it was something more subtle, and more dangerous.
+  </p>
+
+</section>
+
+<!-- SECTION 5 -->
+<section>
+  <h2>The Bug Wasn’t Memory, It Was Ownership</h2>
+
+  <p>
+    The problem wasn’t that resources weren’t being freed.
+    The problem was <em>who</em> thought they owned them.
+  </p>
+
+  <p>
+    When loading a new scene, the editor was directly reaching into renderer state
+    and attempting to reset parts of the scene system itself.
+  </p>
+
+  <p>
+    That worked once. Then it corrupted state.
+  </p>
+
+  <p>
+    The fix wasn’t complicated, but it was architectural.
+  </p>
+
+  <p>
+    The renderer owns the SceneRenderer. Period.
+    The editor is allowed to <em>ask</em>, not reach.
+  </p>
+
+  <pre>
+if (auto* sr = Renderer::GetSceneRenderer())
+{
+    sr->ResetSceneState();
+}
+  </pre>
+
+  <p>
+    One line of access discipline fixed an entire class of crashes.
+  </p>
+</section>
+
+<!-- SECTION 6 -->
+<section>
+  <h2>Proof: Stable Multi-Scene Loading</h2>
+
+  <p>
+    With ownership cleaned up, scenes can now be loaded repeatedly,
+    back-to-back, without restarting the engine.
+  </p>
+
+  <p>
+    Different meshes. Different materials. Different textures.
+    Same renderer. Same session. No crashes.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/scene_cycle_multiple01.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 7 -->
+<section>
+  <h2>Why This Matters More Than It Sounds</h2>
+
+  <p>
+    Scene loading isn’t flashy. There’s no new shader trick here.
+  </p>
+
+  <p>
+    But this is the foundation everything else sits on.
+  </p>
+
+  <p>
+    Without correct ownership, saving and loading becomes a ticking time bomb.
+    With it, RetroEngine can now safely grow.
+  </p>
+
+  <p>
+    Cameras, lighting per scene, level iteration: all of that only works if
+    the engine knows who owns what, and when.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/scene_cycle_multiple02.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 8 -->
+<section>
+  <h2>Where RetroEngine Stands Now</h2>
+
+  <ul>
+    <li>3D scenes serialize cleanly to disk</li>
+    <li>Editor-driven scene authoring is stable</li>
+    <li>Multiple scenes can be loaded in one session</li>
+    <li>Renderer and editor responsibilities are clearly separated</li>
+    <li>CRT pipeline remains fully intact across scene changes</li>
+  </ul>
+</section>
+
+<!-- SECTION 9 -->
+<section>
+  <h2>What Comes Next</h2>
+
+  <p>
+    Scenes currently focus on geometry and materials.
+    Lighting and cameras are intentionally global for now.
+  </p>
+
+  <p>
+    The next steps are obvious and finally safe to tackle:
+  </p>
+
+  <ul>
+    <li>scene-level lighting</li>
+    <li>scene-level cameras</li>
+    <li>editor camera controls</li>
+    <li>clean scene transitions</li>
+  </ul>
+
+  <p>
+    This update didn’t add spectacle.
+    It added stability.
+  </p>
+
+  <p>
+    And that’s how engines actually grow.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2025 RetroEngine</p>
+</footer>
+
+</body>
+</html>
