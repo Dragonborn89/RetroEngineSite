@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 8. Tools, Intent, and the Camera That Isn’t Real</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 8: Cameras Come to Life</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- SECTION 1 -->
+<section>
+  <h2>After Scenes, Something Still Felt Off</h2>
+
+  <p>
+    The last dev log was about scenes. Saving them, loading them, and fixing the subtle
+    ownership bug that made everything fragile.
+  </p>
+
+  <p>
+    That work mattered. Retro Game Engine finally had memory.
+  </p>
+
+  <p>
+    But once the dust settled, something was still missing.
+  </p>
+
+  <p>
+    I could author scenes. I could place entities. I could tweak transforms.
+    But interacting with the world still felt indirect.
+  </p>
+
+  <p>
+    Every scene used the same fixed camera.
+  </p>
+
+  <p>
+    It worked, but it was frustrating to work with. I needed the ability to set different cameras per scene, and on top of that, a way to utilize an "editor" camera with input controls to move around and examine things better.
+  </p>
+</section>
+
+<!-- SECTION 2 -->
+<!-- NEW SECTION -->
+<section>
+  <h2>Cameras Finally Became Real Objects</h2>
+
+  <p>
+    Before this update, RetroEngine technically had a camera.
+  </p>
+
+  <p>
+    It just wasn’t explicit.
+  </p>
+
+  <p>
+    The renderer built a view internally, the scene rendered, and everything
+    worked well enough to move forward.
+  </p>
+
+  <p>
+    That approach was intentional early on. It kept the engine simple while
+    the rendering pipeline, materials, and lighting were still in flux.
+  </p>
+
+  <p>
+    But once scenes could be saved and loaded, that implicit camera became a problem.
+  </p>
+
+  <p>
+    A scene without a camera isn’t really a scene.
+    And a camera that isn’t part of the scene can’t be authored, serialized, or reasoned about.
+  </p>
+
+  <p>
+    So cameras became first-class entities.
+  </p>
+
+  <p>
+    RetroEngine now supports camera entities the same way it supports meshes and sprites:
+  </p>
+
+  <ul>
+    <li>cameras live in the SceneGraph</li>
+    <li>they have transforms</li>
+    <li>they define projection settings (perspective or orthographic)</li>
+    <li>they serialize cleanly into <code>.scene.json</code> files</li>
+    <li>one camera is explicitly marked as active</li>
+  </ul>
+
+  <p>
+    You can add a camera directly from the editor UI, select it, move it,
+    and save it as part of the scene.
+  </p>
+
+  <img src="../assets/images/devlog08_camera_entity.png" class="devimg" alt="Camera Entity UI">
+
+  <p>
+    That single change turns the camera from an engine assumption
+    into authored data.
+  </p>
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <h2>The Editor Camera Is Not Real (And That’s the Point)</h2>
+
+  <p>
+    This is where the lesson from the previous dev log carried forward.
+  </p>
+
+  <p>
+    Just like the editor shouldn’t own renderer state, the editor camera shouldn’t
+    pretend to be a real thing in the world.
+  </p>
+
+  <p>
+    So I split them.
+  </p>
+
+  <p>
+    RetroEngine now has an <strong>EditorCamera</strong> that is:
+  </p>
+
+  <ul>
+    <li>not serialized</li>
+    <li>not part of the SceneGraph</li>
+    <li>not saved to disk</li>
+    <li>not usable by a game</li>
+  </ul>
+
+  <p>
+    It exists purely as a tool.
+  </p>
+
+  <p>
+    That distinction matters more than it sounds. Runtime cameras need to be deterministic.
+    Serializable. Replayable. Editor cameras need to be fast, forgiving, and ergonomic.
+  </p>
+
+  <p>
+    Trying to force those needs into the same abstraction is how engines slowly rot.
+  </p>
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <h2>Input Is Where Engines Get Messy</h2>
+
+  <p>
+    Adding an editor camera sounds trivial on paper.
+  </p>
+
+  <p>
+    In reality, input is one of the fastest ways to create invisible bugs.
+  </p>
+
+  <p>
+    ImGui wants input. The editor viewport wants input. The engine window wants input.
+    Without discipline, everyone grabs at the same state.
+  </p>
+
+  <p>
+    The solution here wasn’t clever. It was careful.
+  </p>
+
+  <p>
+    The editor camera only updates when:
+  </p>
+
+  <ul>
+    <li>the editor camera is explicitly enabled</li>
+    <li>ImGui is not capturing keyboard or mouse input</li>
+    <li>the user is actually interacting with the viewport</li>
+  </ul>
+
+  <p>
+    It’s boring code. And that’s exactly what you want.
+  </p>
+
+  <pre>
+if (io.WantCaptureKeyboard || io.WantCaptureMouse)
+    return;
+  </pre>
+</section>
+
+<!-- SECTION 5 -->
+<section>
+  <h2>Feel Is a Tool, Not a Constant</h2>
+
+  <p>
+    One thing that became obvious quickly is that camera feel isn’t universal.
+  </p>
+
+  <p>
+    A tight interior scene wants slow, deliberate movement.
+    A large open space wants speed.
+  </p>
+
+  <p>
+    So instead of hardcoding values, the editor exposes camera tuning directly:
+  </p>
+
+  <ul>
+    <li>base movement speed</li>
+    <li>boost multiplier</li>
+    <li>mouse look sensitivity</li>
+  </ul>
+
+  <p>
+    These are editor-only controls. They don’t affect the game. But I can now navigate through a scene and look at it in a spatial sense.
+  </p>
+
+  <!-- IMAGE PLACEHOLDER -->
+  <img src="../assets/images/devlog08_editor_camera_controls.png" class="devimg" alt="Editor camera controls UI">
+</section>
+
+<!-- SECTION 6 -->
+<section>
+  <h2>Proof: Moving Through the Scene</h2>
+
+  <p>
+    At some point, the numbers stop mattering and the experience takes over.
+  </p>
+
+  <p>
+    Being able to fly through a scene, stop, adjust, and continue
+    changes how levels are built.
+  </p>
+
+  <!-- VIDEO PLACEHOLDER -->
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog08_editor_camera_flythrough.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 7 -->
+<section>
+  <h2>Why Editor and Runtime Divergence Matters</h2>
+
+  <p>
+    This split isn’t just about convenience.
+  </p>
+
+  <p>
+    It’s about protecting intent.
+  </p>
+
+  <p>
+    Runtime systems care about determinism, reproducibility, and data.
+    Editor systems care about speed, iteration, and intuition.
+  </p>
+
+  <p>
+    By separating them early, RetroEngine avoids an entire class of future compromises.
+  </p>
+
+  <p>
+    Anyone working in this engine later won’t have to guess whether a system
+    exists for the game or for the developer.
+  </p>
+
+  <p>
+    The code tells the truth.
+  </p>
+</section>
+
+<!-- SECTION 8 -->
+<section>
+  <h2>Roadmap Context</h2>
+
+  <p>
+    With an editor camera in place, several things that were risky before are now safe.
+  </p>
+
+  <ul>
+    <li>scene cameras as serialized entities</li>
+    <li>switching between editor view and scene view</li>
+    <li>camera controllers and follow logic</li>
+    <li>viewport gizmos and direct manipulation</li>
+  </ul>
+
+  <p>
+    None of those require hacks anymore. They have a clean place to live.
+  </p>
+</section>
+
+<!-- SECTION 9 -->
+<section>
+  <h2>Where RetroEngine Stands Now</h2>
+
+  <ul>
+    <li>stable scene save/load</li>
+    <li>clear ownership boundaries</li>
+    <li>explicit editor vs runtime separation</li>
+    <li>physical, navigable 3D editor workflow</li>
+  </ul>
+
+  <p>
+    This update didn’t add spectacle.
+  </p>
+
+  <p>
+    It added intent.
+  </p>
+
+  <p>
+    And that’s the kind of progress that compounds down the road (hopefully). I'm excited for whats next, and I think it will be involved in adding lights as scene graph entities as well, since that is the last part still living globally at the moment.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2025 RetroEngine</p>
+</footer>
+
+</body>
+</html>
