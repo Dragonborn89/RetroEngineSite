@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 9. One Pipeline, Real Scenes</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 9: One Pipeline, Real Scenes</h1>
+  <h4>January 4th, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- SECTION 1 -->
+<section>
+  <h2>Merry Christmas!</h2>
+
+  <p>
+    Over the last couple weeks, I took it slow as it was Christmas, but did make some art in my engine to celebrate!
+  </p>
+  
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog09_xmas.mp4" type="video/mp4">
+  </video>
+
+  <h2>After Cameras, Another Problem Became Obvious</h2>
+
+  <p>
+    After the holidays, I looked at the current state of things. After cameras became real scene entities, one thing still stood out.
+  </p>
+
+  <p>
+    Lighting was still global.
+  </p>
+
+  <p>
+    It worked. It was adjustable. But it wasn’t authored.
+  </p>
+
+  <p>
+    That meant lighting changes leaked between scenes, couldn’t be reasoned
+    about in isolation, and didn’t actually belong to the data model yet.
+  </p>
+
+  <p>
+    If cameras needed to live in the SceneGraph to be real,
+    lighting needed to follow the same rule.
+  </p>
+</section>
+
+<!-- SECTION 2 -->
+<section>
+  <h2>Lighting Becomes Scene Data</h2>
+
+  <p>
+    RetroEngine now treats lighting as part of the scene itself.
+  </p>
+
+  <p>
+    Each scene owns its own lighting state, serialized directly into
+    the <code>.scene.json</code> file alongside entities.
+  </p>
+
+  <ul>
+    <li>directional light direction, color, and intensity</li>
+    <li>ambient light color and intensity</li>
+    <li>automatic fallback for older scenes without lighting data</li>
+  </ul>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog09_lighting02.mp4" type="video/mp4">
+  </video>
+
+  <p>
+    When a scene is loaded, its lighting is restored exactly.
+    When a scene has no lighting block, the engine falls back to
+    sensible defaults.
+  </p>
+
+  <p>
+    No global state leaks. No surprises.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog09_lighting01.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <h2>Lighting That Fits the Engine’s Goals</h2>
+
+  <p>
+    RetroEngine isn’t chasing modern physically based lighting.
+  </p>
+
+  <p>
+    That would be dishonest to the aesthetic and unnecessary
+    for the kinds of scenes this engine is meant to build.
+  </p>
+
+  <p>
+    The lighting model is intentionally simple:
+  </p>
+
+  <ul>
+    <li>a single directional light per scene</li>
+    <li>a single ambient contribution</li>
+  </ul>
+
+  <p>
+    This mirrors how many 90s-era games were authored,
+    even if the underlying hardware details varied.
+  </p>
+
+  <p>
+    The result is predictable, controllable lighting that works across
+    low-poly meshes, sprites, and CRT output without fighting the style.
+  </p>
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <h2>Lit vs Unlit Is Now Intentional</h2>
+
+  <p>
+    Another important distinction landed alongside scene lighting.
+  </p>
+
+  <p>
+    By default:
+  </p>
+
+  <ul>
+    <li>3D meshes use lit materials and respond to scene lighting</li>
+    <li>2D sprites default to unlit and ignore lighting entirely</li>
+  </ul>
+
+  <p>
+    That matches how these elements are usually meant to behave.
+    Backgrounds and parallax layers stay stable.
+    Foreground geometry gains depth and form.
+  </p>
+
+  <p>
+    For edge cases, materials can explicitly opt out of lighting.
+    Nothing is forced, but the defaults are sane.
+  </p>
+</section>
+
+<!-- SECTION 5 -->
+<section>
+  <h2>Sprite Features Move Into the Core Pipeline</h2>
+
+  <p>
+    This update also marks the end of RetroEngine’s separate 2D test renderer.
+  </p>
+
+  <p>
+    That pipeline existed for a reason.
+    Early on, the 3D renderer couldn’t yet express everything sprites needed:
+  </p>
+
+  <ul>
+    <li>UV offset and scrolling</li>
+    <li>parallax relative to camera movement</li>
+    <li>camera lock behavior</li>
+    <li>independent scale control</li>
+  </ul>
+
+  <p>
+    Rather than forcing those concepts into an incomplete system,
+    a small isolated 2D path made experimentation safer.
+  </p>
+
+  <p>
+    That phase is now over.
+  </p>
+
+  <p>
+    All sprite behavior is fully supported by the same unified render path
+    used for meshes.
+  </p>
+
+  <p>
+    Sprites are no longer special cases.
+    They are just entities.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog09_uvfeatures.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 6 -->
+<section>
+  <h2>One Renderer, One Set of Rules</h2>
+
+  <p>
+    With sprite features folded into the main renderer:
+  </p>
+
+  <ul>
+    <li>the legacy 2D test pipeline has been removed</li>
+    <li>there is only one render path to reason about</li>
+    <li>materials, transforms, and camera behavior are consistent</li>
+    <li>serialization applies uniformly across 2D and 3D</li>
+  </ul>
+
+  <p>
+    Removing code is always better than keeping temporary systems alive.
+  </p>
+
+  <p>
+    From this point forward, everything that draws is part of the engine proper.
+  </p>
+</section>
+
+<!-- SECTION 7 -->
+<section>
+  <h2>Fixing the Hard Problems: Entity Lifetime</h2>
+
+  <p>
+    Unifying pipelines exposed a deeper issue that couldn’t be ignored anymore.
+  </p>
+
+  <p>
+    Entity duplication and deletion were fragile.
+    In some cases, entities could end up sharing IDs.
+    In others, deleting an entity could crash the renderer outright.
+  </p>
+
+  <p>
+    These weren’t cosmetic bugs.
+    They were ownership problems.
+  </p>
+
+  <p>
+    The fix wasn’t a patch.
+    It required making entity identity and GPU ownership explicit.
+  </p>
+
+  <ul>
+    <li>entity IDs are now guaranteed unique</li>
+    <li>duplication always produces a new identity</li>
+    <li>GPU resources are released before entities are destroyed</li>
+    <li>editor deletions are deferred safely outside iteration</li>
+  </ul>
+
+  <p>
+    Deleting an entity no longer risks invalid memory or stale GPU state.
+  </p>
+
+  <p>
+    The editor can finally be trusted not to hurt the engine.
+  </p>
+</section>
+
+<!-- SECTION 8 -->
+<section>
+  <h2>Editor Quality-of-Life Improvements</h2>
+
+  <p>
+    Alongside the structural fixes, several editor pain points were cleaned up.
+  </p>
+
+  <ul>
+    <li>the currently loaded scene name is now prominently displayed</li>
+    <li>unsaved changes are clearly indicated</li>
+    <li>saving correctly clears dirty state</li>
+    <li>loading scenes no longer carries over stale lighting</li>
+  </ul>
+
+  <p>
+    None of these are flashy.
+  </p>
+
+  <p>
+    But when tools lie to you, you stop trusting them.
+  </p>
+
+  <p>
+    The editor now reflects the real state of the scene accurately.
+  </p>
+</section>
+
+<!-- SECTION 9 -->
+<section>
+  <h2>Where RetroEngine Stands Now</h2>
+
+  <ul>
+    <li>scene-authored cameras</li>
+    <li>editor-only navigation camera</li>
+    <li>scene-level lighting with serialization</li>
+    <li>clear lit vs unlit material defaults</li>
+    <li>unified sprite and mesh rendering pipeline</li>
+    <li>safe duplication and deletion of entities</li>
+  </ul>
+
+  <p>
+    None of this is glamorous.
+  </p>
+
+  <p>
+    But it removes entire classes of future problems.
+  </p>
+
+  <p>
+    RetroEngine now feels less like a renderer with tools,
+    and more like a place where a real game could live.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog09_RetroEngineSceneTest.mp4" type="video/mp4">
+  </video>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>

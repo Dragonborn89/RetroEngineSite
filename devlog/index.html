@@ -234,6 +234,48 @@
   <p class="preview-note">This is just a short summary — click above to read the full log.</p>
 </article>
 
+<!-- Dev Log 9 -->
+<article>
+  <h2>
+    <a href="entry9.html">🧱 Dev Log 9 — One Pipeline, Real Scenes</a>
+    <h4>January 4, 2026</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    After cameras became real scene entities, another problem became impossible to ignore.
+  </p>
+
+  <p>
+    Lighting was still global.
+  </p>
+
+  <p>
+    It worked, but it wasn’t authored. Lighting changes leaked between scenes, couldn’t be
+    reasoned about in isolation, and didn’t actually belong to the data model yet.
+  </p>
+
+  <p>
+    Fixing that led to a larger shift.
+  </p>
+
+  <p>
+    Sprites, meshes, cameras, and lighting now all flow through a single unified rendering
+    pipeline. The old 2D test renderer is gone, and scenes are finally self-contained and
+    trustworthy.
+  </p>
+
+  <p>
+    Along the way, some hard problems surfaced — entity duplication, deletion safety,
+    and GPU ownership — and those were fixed at the root instead of patched over.
+  </p>
+
+  <img src="../assets/images/devlog09_preview.png" alt="RetroEngine lighting and sprite scene">
+  <a href="entry9.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
+
 </section>
 </main>
 
