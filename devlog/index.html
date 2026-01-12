@@ -275,6 +275,45 @@
   <p class="preview-note">This is just a short summary — click above to read the full log.</p>
 </article>
 
+<!-- Dev Log 10 -->
+<article>
+  <h2>
+    <a href="entry10.html">🖥️ Dev Log 10 — Making the CRT Render Pipeline Observable</a>
+    <h4>January 12, 2026</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    After unifying the render pipeline in the last dev log, it was time to stop adding
+    features and start asking harder questions.
+  </p>
+
+  <p>
+    The CRT output looked good, but parts of the system were opaque.
+    Some parameters felt fragile. Others were hard to reason about.
+    Resolution changes could subtly break things.
+  </p>
+
+  <p>
+    Most importantly, I felt like I was often guessing when debugging the render pipeline.
+  </p>
+
+  <p>
+    This dev log is about turning the CRT from a black box into an inspectable system.
+    Debug views were added, energy flow was visualized, and a core masking bug was fixed
+    by treating phosphors as a physical gate instead of a cosmetic effect.
+  </p>
+
+  <p>
+    Along the way, instrumentation caught a serious startup performance regression
+    before it snowballed, reinforcing why observability matters just as much as visuals.
+  </p>
+
+  <img src="../assets/images/devlog10_overview.png" alt="RetroEngine CRT debug views">
+  <a href="entry10.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
 
 </section>
 </main>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RetroEngine — Dev Log 10. Making the CRT Observable</title>
+<title>RetroEngine — Dev Log 10. Making the CRT Render Pipeline Observable</title>
 <link rel="stylesheet" href="../style.css">
 </head>
 
@@ -11,7 +11,7 @@
 
 <header>
   <h1>Dev Log 10: Render Pipeline Cleanup</h1>
-  <h4>January 11th, 2026</h4>
+  <h4>January 12th, 2026</h4>
   <nav>
     <a href="/">Home</a>
     <a href="/devlog/">Dev Log</a>
@@ -84,6 +84,7 @@
   <p>
     The pipeline stopped being a black box.
     Problems became visible instead of theoretical.
+    Before I'd have to guess where things were falling apart, now I can see exactly what stage is causing issues.
   </p>
 
   <!-- IMAGE 1 -->
@@ -210,7 +211,7 @@
 
   <p>
     The reason this didn’t spiral out of control is simple:
-    RetroEngine logs boot time from initialization to first rendered frame.
+    RetroEngine logs boot time from initialization to first rendered frame. This was something I added early on, so every launch would be logged. Its lets me instantly see (not just guess based off perception) when a change had a big impact on the project. And it paid off here.
   </p>
 
   <p>
@@ -275,7 +276,7 @@
   </p>
 
   <p>
-    It was about removing ambiguity.
+    It was about removing ambiguity and shoring up the foundation before I went further.
   </p>
 
   <p>
@@ -299,17 +300,11 @@
   <h2>Seeing It in Motion</h2>
 
   <p>
-    To close this out, here’s a short capture cycling through multiple scenes
-    while switching CRT debug modes in real time.
+    To close this out, here’s a short capture cycling through multiple CRT debug modes in real time.
   </p>
 
   <p>
-    This is the moment where everything finally clicked.
-  </p>
-
-  <p>
-    The renderer isn’t hiding its behavior anymore.
-    It’s explaining itself.
+    From here on out I'll have full visbility into each step of the render process and can identify visual issues a lot easier. Next up, I'm going to explore starting to distinguish between the engine/editor/and game modes.
   </p>
 
   <video autoplay controls loop muted class="devvideo">
