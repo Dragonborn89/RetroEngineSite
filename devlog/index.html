@@ -314,6 +314,58 @@
   <p class="preview-note">This is just a short summary — click above to read the full log.</p>
 </article>
 
+<!-- Dev Log 11 -->
+<article>
+  <h2>
+    <a href="entry11.html">📺 Dev Log 11 — CRT Persistence Is Harder Than It Looks</a>
+    <h4>January 14, 2026</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    After stabilizing the CRT render pipeline in the last dev log,
+    I wanted to tackle one last missing detail before moving forward:
+    phosphor persistence.
+  </p>
+
+  <p>
+    The goal sounded simple: subtle ghosting, faint trails, that
+    unmistakable analog “memory” during motion.
+    Instead, it opened a can of worms.
+  </p>
+
+  <p>
+    What followed was a cascade of failures:
+    broken masks, impossible depth behavior, infinite trails,
+    collapsing brightness, and a mysterious green tint that slowly
+    overtook the entire image.
+  </p>
+
+  <p>
+    This dev log documents that failure in detail:
+    why Rec.709 luma weighting made sense at first,
+    why it completely fell apart inside a feedback loop,
+    and how persistence turned out to be a temporal system
+    rather than a blending problem.
+  </p>
+
+  <p>
+    The breakthrough came from a single conceptual shift:
+    persistence should never add energy.
+    It should only preserve what is already fading.
+  </p>
+
+  <p>
+    By reframing the problem and designing a more physically grounded model,
+    the CRT finally behaved the way it should:
+    stable, predictable, and visually convincing.
+  </p>
+
+  <img src="../assets/images/Devlog11_firsttraileffect.png" alt="Early CRT persistence experiment">
+  <a href="entry11.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
 
 </section>
 </main>
