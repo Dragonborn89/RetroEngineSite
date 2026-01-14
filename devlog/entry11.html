@@ -45,6 +45,10 @@
     and educational debugging sessions I’ve had so far. Rough prototypes of this seemed like it would work, but I wasn not anticiapteing what getting it good would take.
   </p>
 
+  <p>
+    Initial Prototype:
+  </p>
+
   <img src="../assets/images/Devlog11_firsttraileffect.png" class="devimage" alt="Early CRT persistence trail">
 </section>
 
@@ -249,13 +253,17 @@
   <p>
   At this point it was obvious:
   I wasn’t modeling persistence.
-  I was creating an unstable feedback amplifier.
+  I was creating an unstable feedback amplifier. Ever fix would cause other issues at the other end. First overblown with persistence that wouldn't decay, now persistence was going the other way and crushing lighting.
   </p>
 
   <p>
     The core mistake was assuming persistence could be treated as additive light.
     Once light was reintroduced blindly,
     the system lost any notion of conservation or decay.
+  </p>
+
+  <p>
+    Previously vibrant scenes were now all compressed and darkened, such as this one:
   </p>
 
   <img src="../assets/images/Devlog11_toodark.png" class="devimage" alt="Scene darkening failure">
@@ -360,13 +368,17 @@
 
   <p>
     If a system feels fragile, it probably is. The hard part was identifying the contraint I forgot to enforce.
-    And the fix didn't end up being some magical math, it was designing a better model that solved. 
+    And the fix didn't end up being some magical math, it was designing a better construct that fixed things.
   </p>
 
   <p>
     With this resolved, the CRT pipeline is once again stable,
     predictable, and visually trustworthy. Time to move on to building the game structure so I can start making stuff with this thing. 
   </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/Devlog11_overview.mp4" type="video/mp4">
+  </video>
 </section>
 
 </main>
