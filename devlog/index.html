@@ -26,292 +26,22 @@
 
   <section class="log-list">
 
-  <!-- Dev Log 1 -->
-  <article>
-    <h2>
-      <a href="entry1.html">🧠 Dev Log 1 — From First Light to First Frame</a>
-      <h4>November 05, 2025</h4>
-      <span class="preview-label">Preview</span>
-    </h2>
 
-    <p>
-      RetroEngine began as a blank D3D12 window, a personal experiment to see if a CRT could be simulated not as a filter, but as a physical system. Within the first week, that idea evolved into a functioning real-time display model, complete with beam scanning, phosphor decay, and color-accurate light response.
-    </p>
-
-    <p>
-      The renderer now reproduces real phosphor layouts, beam afterglow, and even a simple 3D scene, all rendered through a fully simulated CRT pipeline. This marks the foundation of RetroEngine’s goal: not imitation, but reconstruction of analog light.
-    </p>
-
-    <img src="../assets/images/log1_preview.jpg" alt="Preview of the first RetroEngine CRT render">
-    <a href="entry1.html" class="button">Read Full Log</a>
-    <p class="preview-note">This is just a short summary — click above to read the full log.</p>
-  </article>
-
-  <!-- Dev Log 2 -->
+<!-- Dev Log 12 -->
 <article>
   <h2>
-    <a href="entry2.html">⚙️ Dev Log 2 — Building the Foundation</a>
-    <h4>November 07, 2025</h4>
-    <span class="preview-label">Preview</span>
+    <a href="entry12.html">🎬 Dev Log 12 — Current State Overview (Video)</a>
+    <h4>January 17, 2026</h4>
+    <span class="preview-label">Video</span>
   </h2>
 
   <p>
-    With the CRT renderer stable, this phase focused on structure and scalability; defining how RetroEngine organizes and renders its world. The new ECS-style architecture introduces clean separation between data and behavior, with components for scenes, materials, and gpu meshes, driving a modular pipeline.
+    A full walkthrough of RetroEngine as it exists today.
+    This 25-minute video covers the editor, rendering pipeline,
+    CRT simulation, and scene authoring workflow end-to-end.
   </p>
-
-  <p>
-    The first 3D scene renderer now runs with verified Blinn–Phong lighting, world-space normals, and HDR output feeding directly into the CRT simulation stage. This milestone proves the engine’s rendering core is stable enough to support both 2D and 3D pipelines under a single system.
-  </p>
-
-  <img src="../assets/images/devlog02_01.jpg" alt="First 3D test cube rendered in RetroEngine">
-  <a href="entry2.html" class="button">Read Full Log</a>
-  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
-</article>
-
-  <!-- Dev Log 3 -->
-<article>
-  <h2>
-    <a href="entry3.html">⚙️ Dev Log 3 — Parallax in Motion</a>
-    <h4>November 09, 2025</h4>
-    <span class="preview-label">Preview</span>
-  </h2>
-
-  <p>
-    In just a few days, RetroEngine took a major step forward.  
-      The engine can now render true 2D parallax scenes, built entirely on its custom DirectX 12 renderer and running through the same HDR signal path as the 3D stage.
-  </p>
-
-  <p>
-    This isn’t just a visual feature. It’s the first proof that RetroEngine’s rendering core can support a full 2D pipeline — modular, efficient, and deeply tied into the CRT simulation.  
-    Every pixel is treated as light, not color data, which means the behavior of the image is physically modeled from input to glass.
-  </p>
-
-  <img src="../assets/images/devlog03_01.jpg" alt="First 2D test in RetroEngine">
-  <a href="entry3.html" class="button">Read Full Log</a>
-  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
-</article>
-
- <!-- Dev Log 4 -->
-  <article>
-    <h2>
-      <a href="entry4.html">🛠️ Dev Log 4 — The Editor Takes Shape</a>
-      <h4>November 18, 2025</h4>
-      <span class="preview-label">Preview</span>
-    </h2>
-
-    <p>
-      This update marks a major turning point for RetroEngine. What began as simple debug panels
-      has grown into the first real editor: a fully dockable interface powered by ImGui’s docking 
-      branch, tied directly into the engine’s live rendering pipeline.
-    </p>
-
-    <p>
-      Scenes can now be edited in real time; adding and removing layers, adjusting parallax,
-      importing textures, updating names, and instantly seeing the results through the CRT
-      simulation. A new import pipeline ensures every PNG is safely brought into the project
-      structure, and JSON scene files now save and load reliably.
-    </p>
-
-    <img src="../assets/images/devlog04_editor_overview.png" alt="RetroEngine editor overview">
-    <a href="entry4.html" class="button">Read Full Log</a>
-    <p class="preview-note">This is just a short summary — click above to read the full log.</p>
-  </article>
-
- <!-- Dev Log 5 -->
-<article>
-  <h2>
-    <a href="entry5.html">🧩 Dev Log 5 — Sprites, Materials, and The Great Sorting Adventure</a>
-    <h4>December 03, 2025</h4>
-    <span class="preview-label">Preview</span>
-  </h2>
-
-  <p>
-    This update was all about taking the 2D and 3D pipelines and combining them to behave like a real 
-    engine. Depth sorting finally works, sprites get their own textures, and materials no longer 
-    bleed between entities. It wasn’t easy, a lot of this felt like stumbling in the dark until 
-    things clicked, but the engine is much stronger for it.
-  </p>
-
-  <p>
-    Two videos in this log show the new per-entity material editor and proper depth-sorted 
-    transforms in action.
-  </p>
-
-  <img src="../assets/images/devlog05_preview.png" alt="Preview for Dev Log 5">
-  <a href="entry5.html" class="button">Read Full Log</a>
-  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
-</article>
-
-<!-- Dev Log 6 -->
-<article>
-  <h2>
-    <a href="entry6.html">🚀 Dev Log 6 — Lighting, Materials, Mesh Importing & The CRT Reality Check</a>
-    <h4>December 06, 2025</h4>
-    <span class="preview-label">Preview</span>
-  </h2>
-
-  <p>
-    This update pulled RetroEngine out of the prototype phase and into real rendering territory.
-    Albedo textures now work across the entire engine, a proper lighting system is in place 
-    (directional + ambient), emissive behaves like the hardware that inspired the project, and the 
-    editor can import real OBJ models end-to-end.
-  </p>
-
-  <p>
-    The CRT pass exposed tiny shading issues that the raw framebuffer completely hid, and fixing 
-    them led to one of the most satisfying wins so far: importing a full spaceship model and having 
-    it light correctly on the first good compile. A three-line bug in the OBJ importer was the final 
-    boss, and once it fell, everything clicked into place.
-  </p>
-
-  <img src="../assets/images/ship_final01.png" alt="First successfully imported ship in RetroEngine with lighting and CRT">
-  <a href="entry6.html" class="button">Read Full Log</a>
-  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
-</article>
-
-<!-- Dev Log 7 -->
-<article>
-  <h2>
-    <a href="entry7.html">📦 Dev Log 7 — Scenes, State, and the Cost of Ownership</a>
-    <h4>December 12, 2025</h4>
-    <span class="preview-label">Preview</span>
-  </h2>
-
-  <p>
-    RetroEngine now supports full 3D scene saving and loading. Entities, meshes, materials,
-    textures, and transforms serialize cleanly to disk and can be reloaded through the editor.
-    This marks the transition from a live rendering sandbox to a real world-authoring tool.
-  </p>
-
-  <p>
-    Getting there exposed a subtle but critical engine bug. Loading a second scene reliably
-    crashed the engine, not due to leaks, but due to incorrect ownership boundaries between
-    the editor and renderer. Fixing that architectural flaw stabilized multi-scene loading
-    and laid the groundwork for future features like cameras and per-scene lighting.
-  </p>
-
-  <img src="../assets/images/editor_scene_overview.png" alt="RetroEngine editor scene overview">
-  <a href="entry7.html" class="button">Read Full Log</a>
-  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
-</article>
-
-<!-- Dev Log 8 -->
-<article>
-  <h2>
-    <a href="entry8.html">🎥 Dev Log 8 — Cameras Come to Life</a>
-    <h4>December 18, 2025</h4>
-    <span class="preview-label">Preview</span>
-  </h2>
-
-  <p>
-    The last dev log was about scenes. Saving them, loading them, and fixing the subtle
-    ownership bug that made everything fragile.
-  </p>
-
-  <p>
-    That work mattered. Retro Game Engine finally had memory.
-  </p>
-
-  <p>
-    But once the dust settled, something was still missing.
-  </p>
-
-  <p>
-    I could author scenes. I could place entities. I could tweak transforms.
-    But interacting with the world still felt indirect.
-  </p>
-
-  <p>
-    Every scene used the same fixed camera.
-  </p>
-
-  <p>
-    It worked, but it was frustrating to work with. I needed the ability to set different cameras per scene, and on top of that, a way to utilize an "editor" camera with input controls to move around and examine things better.
-  </p>
-
-  <img src="../assets/images/devlog08_preview.png" alt="RetroEngine camera screenshot">
-  <a href="entry8.html" class="button">Read Full Log</a>
-  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
-</article>
-
-<!-- Dev Log 9 -->
-<article>
-  <h2>
-    <a href="entry9.html">🧱 Dev Log 9 — One Pipeline, Real Scenes</a>
-    <h4>January 4, 2026</h4>
-    <span class="preview-label">Preview</span>
-  </h2>
-
-  <p>
-    After cameras became real scene entities, another problem became impossible to ignore.
-  </p>
-
-  <p>
-    Lighting was still global.
-  </p>
-
-  <p>
-    It worked, but it wasn’t authored. Lighting changes leaked between scenes, couldn’t be
-    reasoned about in isolation, and didn’t actually belong to the data model yet.
-  </p>
-
-  <p>
-    Fixing that led to a larger shift.
-  </p>
-
-  <p>
-    Sprites, meshes, cameras, and lighting now all flow through a single unified rendering
-    pipeline. The old 2D test renderer is gone, and scenes are finally self-contained and
-    trustworthy.
-  </p>
-
-  <p>
-    Along the way, some hard problems surfaced: entity duplication, deletion safety,
-    and GPU ownership and those were fixed at the root instead of patched over.
-  </p>
-
-  <img src="../assets/images/devlog09_preview.png" alt="RetroEngine lighting and sprite scene">
-  <a href="entry9.html" class="button">Read Full Log</a>
-  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
-</article>
-
-<!-- Dev Log 10 -->
-<article>
-  <h2>
-    <a href="entry10.html">🖥️ Dev Log 10 — Making the CRT Render Pipeline Observable</a>
-    <h4>January 12, 2026</h4>
-    <span class="preview-label">Preview</span>
-  </h2>
-
-  <p>
-    After unifying the render pipeline in the last dev log, it was time to stop adding
-    features and start asking harder questions.
-  </p>
-
-  <p>
-    The CRT output looked good, but parts of the system were opaque.
-    Some parameters felt fragile. Others were hard to reason about.
-    Resolution changes could subtly break things.
-  </p>
-
-  <p>
-    Most importantly, I felt like I was often guessing when debugging the render pipeline.
-  </p>
-
-  <p>
-    This dev log is about turning the CRT from a black box into an inspectable system.
-    Debug views were added, energy flow was visualized, and a core masking bug was fixed
-    by treating phosphors as a physical gate instead of a cosmetic effect.
-  </p>
-
-  <p>
-    Along the way, instrumentation caught a serious startup performance regression
-    before it snowballed, reinforcing why observability matters just as much as visuals.
-  </p>
-
-  <img src="../assets/images/devlog10_overview.png" alt="RetroEngine CRT debug views">
-  <a href="entry10.html" class="button">Read Full Log</a>
-  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+  <img src="../assets/images/videolog01.png" alt="Early CRT persistence experiment">
+  <a href="entry12.html" class="button">Watch the Overview</a>
 </article>
 
 <!-- Dev Log 11 -->
@@ -366,23 +96,294 @@
   <p class="preview-note">This is just a short summary — click above to read the full log.</p>
 </article>
 
+<!-- Dev Log 10 -->
 <article>
   <h2>
-    <a href="entry12.html">🎬 Dev Log 12 — Current State Overview (Video)</a>
-    <h4>January 17, 2026</h4>
-    <span class="preview-label">Video</span>
+    <a href="entry10.html">🖥️ Dev Log 10 — Making the CRT Render Pipeline Observable</a>
+    <h4>January 12, 2026</h4>
+    <span class="preview-label">Preview</span>
   </h2>
 
   <p>
-    A full walkthrough of RetroEngine as it exists today.
-    This 25-minute video covers the editor, rendering pipeline,
-    CRT simulation, and scene authoring workflow end-to-end.
+    After unifying the render pipeline in the last dev log, it was time to stop adding
+    features and start asking harder questions.
   </p>
-  <img src="../assets/images/videolog01.png" alt="Early CRT persistence experiment">
-  <a href="entry12.html" class="button">Watch the Overview</a>
+
+  <p>
+    The CRT output looked good, but parts of the system were opaque.
+    Some parameters felt fragile. Others were hard to reason about.
+    Resolution changes could subtly break things.
+  </p>
+
+  <p>
+    Most importantly, I felt like I was often guessing when debugging the render pipeline.
+  </p>
+
+  <p>
+    This dev log is about turning the CRT from a black box into an inspectable system.
+    Debug views were added, energy flow was visualized, and a core masking bug was fixed
+    by treating phosphors as a physical gate instead of a cosmetic effect.
+  </p>
+
+  <p>
+    Along the way, instrumentation caught a serious startup performance regression
+    before it snowballed, reinforcing why observability matters just as much as visuals.
+  </p>
+
+  <img src="../assets/images/devlog10_overview.png" alt="RetroEngine CRT debug views">
+  <a href="entry10.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
 </article>
 
 
+<!-- Dev Log 9 -->
+<article>
+  <h2>
+    <a href="entry9.html">🧱 Dev Log 9 — One Pipeline, Real Scenes</a>
+    <h4>January 4, 2026</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    After cameras became real scene entities, another problem became impossible to ignore.
+  </p>
+
+  <p>
+    Lighting was still global.
+  </p>
+
+  <p>
+    It worked, but it wasn’t authored. Lighting changes leaked between scenes, couldn’t be
+    reasoned about in isolation, and didn’t actually belong to the data model yet.
+  </p>
+
+  <p>
+    Fixing that led to a larger shift.
+  </p>
+
+  <p>
+    Sprites, meshes, cameras, and lighting now all flow through a single unified rendering
+    pipeline. The old 2D test renderer is gone, and scenes are finally self-contained and
+    trustworthy.
+  </p>
+
+  <p>
+    Along the way, some hard problems surfaced: entity duplication, deletion safety,
+    and GPU ownership and those were fixed at the root instead of patched over.
+  </p>
+
+  <img src="../assets/images/devlog09_preview.png" alt="RetroEngine lighting and sprite scene">
+  <a href="entry9.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
+<!-- Dev Log 8 -->
+<article>
+  <h2>
+    <a href="entry8.html">🎥 Dev Log 8 — Cameras Come to Life</a>
+    <h4>December 18, 2025</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    The last dev log was about scenes. Saving them, loading them, and fixing the subtle
+    ownership bug that made everything fragile.
+  </p>
+
+  <p>
+    That work mattered. Retro Game Engine finally had memory.
+  </p>
+
+  <p>
+    But once the dust settled, something was still missing.
+  </p>
+
+  <p>
+    I could author scenes. I could place entities. I could tweak transforms.
+    But interacting with the world still felt indirect.
+  </p>
+
+  <p>
+    Every scene used the same fixed camera.
+  </p>
+
+  <p>
+    It worked, but it was frustrating to work with. I needed the ability to set different cameras per scene, and on top of that, a way to utilize an "editor" camera with input controls to move around and examine things better.
+  </p>
+
+  <img src="../assets/images/devlog08_preview.png" alt="RetroEngine camera screenshot">
+  <a href="entry8.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
+<!-- Dev Log 7 -->
+<article>
+  <h2>
+    <a href="entry7.html">📦 Dev Log 7 — Scenes, State, and the Cost of Ownership</a>
+    <h4>December 12, 2025</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    RetroEngine now supports full 3D scene saving and loading. Entities, meshes, materials,
+    textures, and transforms serialize cleanly to disk and can be reloaded through the editor.
+    This marks the transition from a live rendering sandbox to a real world-authoring tool.
+  </p>
+
+  <p>
+    Getting there exposed a subtle but critical engine bug. Loading a second scene reliably
+    crashed the engine, not due to leaks, but due to incorrect ownership boundaries between
+    the editor and renderer. Fixing that architectural flaw stabilized multi-scene loading
+    and laid the groundwork for future features like cameras and per-scene lighting.
+  </p>
+
+  <img src="../assets/images/editor_scene_overview.png" alt="RetroEngine editor scene overview">
+  <a href="entry7.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
+<!-- Dev Log 6 -->
+<article>
+  <h2>
+    <a href="entry6.html">🚀 Dev Log 6 — Lighting, Materials, Mesh Importing & The CRT Reality Check</a>
+    <h4>December 06, 2025</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    This update pulled RetroEngine out of the prototype phase and into real rendering territory.
+    Albedo textures now work across the entire engine, a proper lighting system is in place 
+    (directional + ambient), emissive behaves like the hardware that inspired the project, and the 
+    editor can import real OBJ models end-to-end.
+  </p>
+
+  <p>
+    The CRT pass exposed tiny shading issues that the raw framebuffer completely hid, and fixing 
+    them led to one of the most satisfying wins so far: importing a full spaceship model and having 
+    it light correctly on the first good compile. A three-line bug in the OBJ importer was the final 
+    boss, and once it fell, everything clicked into place.
+  </p>
+
+  <img src="../assets/images/ship_final01.png" alt="First successfully imported ship in RetroEngine with lighting and CRT">
+  <a href="entry6.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
+<!-- Dev Log 5 -->
+<article>
+  <h2>
+    <a href="entry5.html">🧩 Dev Log 5 — Sprites, Materials, and The Great Sorting Adventure</a>
+    <h4>December 03, 2025</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    This update was all about taking the 2D and 3D pipelines and combining them to behave like a real 
+    engine. Depth sorting finally works, sprites get their own textures, and materials no longer 
+    bleed between entities. It wasn’t easy, a lot of this felt like stumbling in the dark until 
+    things clicked, but the engine is much stronger for it.
+  </p>
+
+  <p>
+    Two videos in this log show the new per-entity material editor and proper depth-sorted 
+    transforms in action.
+  </p>
+
+  <img src="../assets/images/devlog05_preview.png" alt="Preview for Dev Log 5">
+  <a href="entry5.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
+<!-- Dev Log 4 -->
+  <article>
+    <h2>
+      <a href="entry4.html">🛠️ Dev Log 4 — The Editor Takes Shape</a>
+      <h4>November 18, 2025</h4>
+      <span class="preview-label">Preview</span>
+    </h2>
+
+    <p>
+      This update marks a major turning point for RetroEngine. What began as simple debug panels
+      has grown into the first real editor: a fully dockable interface powered by ImGui’s docking 
+      branch, tied directly into the engine’s live rendering pipeline.
+    </p>
+
+    <p>
+      Scenes can now be edited in real time; adding and removing layers, adjusting parallax,
+      importing textures, updating names, and instantly seeing the results through the CRT
+      simulation. A new import pipeline ensures every PNG is safely brought into the project
+      structure, and JSON scene files now save and load reliably.
+    </p>
+
+    <img src="../assets/images/devlog04_editor_overview.png" alt="RetroEngine editor overview">
+    <a href="entry4.html" class="button">Read Full Log</a>
+    <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+  </article>
+
+<!-- Dev Log 3 -->
+<article>
+  <h2>
+    <a href="entry3.html">⚙️ Dev Log 3 — Parallax in Motion</a>
+    <h4>November 09, 2025</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    In just a few days, RetroEngine took a major step forward.  
+      The engine can now render true 2D parallax scenes, built entirely on its custom DirectX 12 renderer and running through the same HDR signal path as the 3D stage.
+  </p>
+
+  <p>
+    This isn’t just a visual feature. It’s the first proof that RetroEngine’s rendering core can support a full 2D pipeline — modular, efficient, and deeply tied into the CRT simulation.  
+    Every pixel is treated as light, not color data, which means the behavior of the image is physically modeled from input to glass.
+  </p>
+
+  <img src="../assets/images/devlog03_01.jpg" alt="First 2D test in RetroEngine">
+  <a href="entry3.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
+<!-- Dev Log 2 -->
+<article>
+  <h2>
+    <a href="entry2.html">⚙️ Dev Log 2 — Building the Foundation</a>
+    <h4>November 07, 2025</h4>
+    <span class="preview-label">Preview</span>
+  </h2>
+
+  <p>
+    With the CRT renderer stable, this phase focused on structure and scalability; defining how RetroEngine organizes and renders its world. The new ECS-style architecture introduces clean separation between data and behavior, with components for scenes, materials, and gpu meshes, driving a modular pipeline.
+  </p>
+
+  <p>
+    The first 3D scene renderer now runs with verified Blinn–Phong lighting, world-space normals, and HDR output feeding directly into the CRT simulation stage. This milestone proves the engine’s rendering core is stable enough to support both 2D and 3D pipelines under a single system.
+  </p>
+
+  <img src="../assets/images/devlog02_01.jpg" alt="First 3D test cube rendered in RetroEngine">
+  <a href="entry2.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
+<!-- Dev Log 1 -->
+  <article>
+    <h2>
+      <a href="entry1.html">🧠 Dev Log 1 — From First Light to First Frame</a>
+      <h4>November 05, 2025</h4>
+      <span class="preview-label">Preview</span>
+    </h2>
+
+    <p>
+      RetroEngine began as a blank D3D12 window, a personal experiment to see if a CRT could be simulated not as a filter, but as a physical system. Within the first week, that idea evolved into a functioning real-time display model, complete with beam scanning, phosphor decay, and color-accurate light response.
+    </p>
+
+    <p>
+      The renderer now reproduces real phosphor layouts, beam afterglow, and even a simple 3D scene, all rendered through a fully simulated CRT pipeline. This marks the foundation of RetroEngine’s goal: not imitation, but reconstruction of analog light.
+    </p>
+
+    <img src="../assets/images/log1_preview.jpg" alt="Preview of the first RetroEngine CRT render">
+    <a href="entry1.html" class="button">Read Full Log</a>
+    <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+  </article>
 </section>
 </main>
 

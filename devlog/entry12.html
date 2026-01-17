@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RetroEngine — Dev Log 11. CRT Persistence Is Harder Than It Looks</title>
+<title>RetroEngine — Dev Log 12. Current State Overview</title>
 <link rel="stylesheet" href="../style.css">
 </head>
 
 <body>
 
 <header>
-  <h1>Dev Log 11: CRT Persistence, Feedback, and Failure</h1>
-  <h4>January 14th, 2026</h4>
+  <h1>Dev Log 12: Current State Overview (Video)</h1>
+  <h4>January 17th, 2026</h4>
   <nav>
     <a href="/">Home</a>
     <a href="/devlog/">Dev Log</a>
@@ -24,361 +24,78 @@
 
 <!-- SECTION 1 -->
 <section>
-  <h2>The Can of Worms I Wasn't Expecting</h2>
+  <h2>A Walkthrough of the Engine as It Exists Today</h2>
 
   <p>
-    At this point, I wanted to improve one more aspect of the render pipeline before moving forward: persistence.
+    This dev log is a little different.
   </p>
 
   <p>
-    A subtle CRT ghosting effect when the camera moves.
-    Bright objects leaving faint trails.
-    The kind of thing you barely notice until it’s gone, but it just adds that subtle bit of life I'm looking to replicate.
+    Instead of focusing on a single feature or system, this video is a
+    complete walkthrough of the current state of RetroEngine.
   </p>
 
   <p>
-    On paper, this sounded like a small feature.
+    It covers the editor, rendering pipeline, CRT simulation,
+    scene authoring workflow, and the decisions that shaped the engine
+    up to this point.
   </p>
+</section>
 
-  <p>
-    In reality, it turned into one of the most fragile, frustrating,
-    and educational debugging sessions I’ve had so far. Rough prototypes of this seemed like it would work, but I wasn not anticiapteing what getting it good would take.
-  </p>
-
-  <p>
-    Initial Prototype:
-  </p>
-
-  <img src="../assets/images/Devlog11_firsttraileffect.png" class="devimage" alt="Early CRT persistence trail">
+<!-- VIDEO SECTION -->
+<section>
+  <div class="video-embed">
+    <iframe
+      src="https://www.youtube-nocookie.com/embed/ri4sCybWftU"
+      title="RetroEngine Dev Log 12 — Current State Overview"
+      frameborder="0"
+      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen>
+    </iframe>
+  </div>
 </section>
 
 <!-- SECTION 2 -->
 <section>
-  <h2>Early Success (and False Confidence)</h2>
+  <h2>What’s Covered</h2>
+
+  <ul>
+    <li>the unified 2D / 3D rendering pipeline</li>
+    <li>scene graph structure and serialization</li>
+    <li>editor workflows and quality-of-life tooling</li>
+    <li>CRT beam, mask, and persistence simulation</li>
+    <li>current limitations and intentional tradeoffs</li>
+  </ul>
 
   <p>
-    The first versions looked promising.
+    This is not a roadmap video.
   </p>
 
   <p>
-    Rotating geometry left trails.
-    Camera motion felt more analog.
-    It had that unmistakable CRT “memory.”
-  </p>
-
-  <p>
-    At the time, persistence was implemented as a feedback pass after the CRT emission stage.
-    The idea was simple: take last frame’s phosphor output, decay it, and blend it back in.
-  </p>
-
-  <p>
-    Conceptually, this felt reasonable.
-    CRTs retain light.
-    So store light, fade it out, and reuse it.
-  </p>
-
-  <p>
-    But almost immediately, things started breaking in places
-    that persistence should never have touched.
+    It’s a snapshot — a clear picture of what the engine can do
+    <em>right now</em>, and how it behaves as a system.
   </p>
 </section>
 
 <!-- SECTION 3 -->
 <section>
-  <h2>The Mask Starts Falling Apart</h2>
+  <h2>Why This Matters</h2>
 
   <p>
-    One of the first regressions was the phosphor mask.
+    RetroEngine has reached a point where individual features
+    are less important than how they work together.
   </p>
 
   <p>
-    Solid colors began filling in.
-    Subpixel structure disappeared.
-    Backgrounds showed strange artifacts.
+    Seeing the engine in motion — editing scenes, loading assets,
+    adjusting CRT parameters, and observing how everything responds —
+    communicates far more than screenshots or patch notes ever could.
   </p>
 
   <p>
-    This was a huge red flag.
-    The mask had already been carefully fixed in the previous dev log.
+    From here on, development is about refinement, clarity,
+    and turning this foundation into something games can reliably live on.
   </p>
-
-  <p>
-    Persistence was leaking light into places where no phosphors exist.
-  </p>
-
-  <p>
-    That meant energy which should have been spatially constrained
-    was being reintroduced later in the pipeline,
-    after masking, shaping, and tonemapping had already happened.
-  </p>
-
-  <p>
-    In other words, the mask was no longer a physical constraint.
-    It had become a suggestion.
-  </p>
-
-  <img src="../assets/images/Devlog11_lostmask.png" class="devimage" alt="Broken CRT mask">
-</section>
-
-<!-- SECTION 4 -->
-<section>
-  <h2>When Light Starts Doing Impossible Things</h2>
-
-  <p>
-    The next bug made it clear something was fundamentally wrong.
-  </p>
-
-  <p>
-    A white cube rendered behind a yellow cube…
-    started showing up on top of it.
-  </p>
-
-  <p>
-    This wasn’t a depth issue.
-    It wasn’t sorting.
-  </p>
-
-  <p>
-  It was light math violating basic rendering rules.
-  </p>
-
-  <p>
-    Values that should have only ever faded were instead being reinforced.
-    Once that happens, ordering no longer mattered,
-    brighter history could overpower current geometry regardless of depth. This was challenging. 
-  </p>
-
-  <img src="../assets/images/Devlog11_whiteontop.png" class="devimage" alt="White cube rendering on top">
-</section>
-
-<!-- SECTION 5 -->
-<section>
-  <h2>Why Everything Turned Green</h2>
-
-  <p>
-    As fixes stacked on top of fixes, a new problem emerged.
-  </p>
-
-  <p>
-    Entire scenes developed a green tint out of nowhere. At this point I felt like everytime I put out one fire another one sprung up.
-    Especially in shadows and neutral colors.
-  </p>
-
-  <p>
-    At first, this felt random.
-    Nothing in the pipeline explicitly boosted green.
-  </p>
-
-  <p>
-    The root cause turned out to be something I had taken for granted:
-    Rec.709 luminance weighting.
-  </p>
-
-  <p>
-    Using Rec.709 luma made perfect sense initially.
-    It’s the standard for modern displays.
-    It’s what GPUs, video encoders, and post-process pipelines are built around.
-    If you need a perceptual brightness estimate, Rec.709 is usually the correct answer.
-  </p>
-
-  <p>
-    But Rec.709 is <em>intentionally</em> green-biased.
-  </p>
-
-  <p>
-    In its luma calculation, green contributes the majority of perceived brightness,
-    followed by red, with blue contributing very little.
-    That bias exists for good reasons in video compression and broadcast workflows.
-  </p>
-
-  <p>
-    The problem is that I wasn’t using Rec.709 for compression or display encoding.
-    I was using it inside a feedback loop.
-  </p>
-
-  <p>
-    Persistence meant that every frame fed into the next one.
-    Small per-channel differences didn’t just show up,
-    they accumulated over time.
-  </p>
-
-  <p>
-    Green accumulated faster than red or blue.
-    Over time, it simply won.
-  </p>
-
-  <p>
-    Nothing was “tinted” deliberately.
-    The system was doing exactly what I told it to do.
-    I just hadn’t accounted for how perceptual weighting behaves when reused as energy math.
-  </p>
-
-  <p>
-    The fix wasn’t removing luma entirely,
-    but being far more careful about where and how it was used.
-  </p>
-
-  <p>
-    Luminance is now treated as a control signal,
-    for gating, decay, and thresholds,
-    not as something that directly feeds energy back into the system.
-  </p>
-
-  <p>
-    Once color was allowed to decay independently,
-    without perceptual bias being reapplied every frame,
-    the green drift stopped completely.
-  </p>
-
-  <div class="devimage-row">
-    <img src="../assets/images/Devlog11_green01.png" class="devimage" alt="Green tint issue example 1">
-    <img src="../assets/images/Devlog11_green02.png" class="devimage" alt="Green tint issue example 2">
-  </div>
-</section>
-
-<!-- SECTION 6 -->
-<section>
-  <h2>The Image Collapses</h2>
-
-  <p>
-    Attempts to fix the color drift introduced a new failure mode.
-  </p>
-
-  <p>
-    Scenes became darker.
-    Then flat.
-    Then nearly black.
-  </p>
-
-  <p>
-  At this point it was obvious:
-  I wasn’t modeling persistence.
-  I was creating an unstable feedback amplifier. Ever fix would cause other issues at the other end. First overblown with persistence that wouldn't decay, now persistence was going the other way and crushing lighting.
-  </p>
-
-  <p>
-    The core mistake was assuming persistence could be treated as additive light.
-    Once light was reintroduced blindly,
-    the system lost any notion of conservation or decay.
-  </p>
-
-  <p>
-    Previously vibrant scenes were now all compressed and darkened, such as this one:
-  </p>
-
-  <img src="../assets/images/Devlog11_toodark.png" class="devimage" alt="Scene darkening failure">
-</section>
-
-<!-- SECTION 7 -->
-<section>
-  <h2>The Breakthrough: Persistence Is Not Additive</h2>
-
-  <p>
-    The turning point came from reframing the problem entirely.
-  </p>
-
-  <p>
-    Persistence should not add energy.
-  </p>
-
-  <p>
-    A CRT does not accumulate brightness.
-    Phosphors on the screen get excited be electrons (it "remembers" where light used to be) and then they decay over time.
-  </p>
-
-  <p>
-    After a refactor, the final model treats persistence as a decay-only history buffer.
-    Now on each frame:
-  </p>
-
-  <ul>
-    <li>current beam emission is computed fresh, with no history influence</li>
-    <li>previous phosphor output decays based on time, not frame count</li>
-    <li>history only contributes where the current frame is dimmer than the last</li>
-  </ul>
-
-  <p>
-    That last constraint turned out to be critical.
-    History is never allowed to overpower the present. That alone fixed a lot of the issues.
-  </p>
-
-  <p>
-    Once this rule was enforced, multiple problems vanished at once:
-  </p>
-
-  <ul>
-    <li>infinite trails stopped immediately</li>
-    <li>color drift disappeared</li>
-    <li>mask gaps stayed dark</li>
-    <li>brightness stabilized across scenes</li>
-  </ul>
-
-  <p>
-    Things got so broken at one point that objects effectively turned into paintbrushes,
-    dragging color endlessly across the screen.
-    That failure made the flaw impossible to ignore.
-  </p>
-
-  <video autoplay controls loop muted class="devvideo">
-    <source src="../assets/videos/Devlog11_PersistenceBroken.mp4" type="video/mp4">
-  </video>
-</section>
-
-<!-- SECTION 8 -->
-<section>
-  <h2>Seeing the Final Result</h2>
-
-  <p>
-    With persistence behaving correctly, the slider finally became intuitive.
-  </p>
-
-  <p>
-    Low values feel crisp.
-    Higher values create visible analog memory.
-    Nothing burns in.
-    Nothing turns green.
-  </p>
-
-  <p>
-    This is the behavior I was after from the start. I did not expect it to take a few days to figure out though.
-  </p>
-
-  <video autoplay controls loop muted class="devvideo">
-    <source src="../assets/videos/Devlog11_PersistenceTrailFixed.mp4" type="video/mp4">
-  </video>
-</section>
-
-<!-- SECTION 9 -->
-<section>
-  <h2>What This Taught Me</h2>
-
-  <p>
-    Persistence is not a blur.
-    It is not blending.
-    It is not a post-process.
-  </p>
-
-  <p>
-    It is a temporal system...and temporal systems amplify mistakes.
-  </p>
-
-  <p>
-    This work reinforced something important:
-  </p>
-
-  <p>
-    If a system feels fragile, it probably is. The hard part was identifying the contraint I forgot to enforce.
-    And the fix didn't end up being some magical math, it was designing a better construct that fixed things.
-  </p>
-
-  <p>
-    With this resolved, the CRT pipeline is once again stable,
-    predictable, and visually trustworthy. Time to move on to building the game structure so I can start making stuff with this thing. 
-  </p>
-
-  <video autoplay controls loop muted class="devvideo">
-    <source src="../assets/videos/Devlog11_overview.mp4" type="video/mp4">
-  </video>
 </section>
 
 </main>
