@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 13. Building Scenes Faster With Reuse Tools</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 13: Building Scenes Faster With Reuse Tools</h1>
+  <h4>January 20th, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- SECTION 1 -->
+<section>
+  <h2>After Persistence, I Needed Better Tools</h2>
+
+  <p>
+    Dev Log 11 was about stabilizing CRT persistence and getting the feedback loop under control.
+    Once that was solved, the renderer felt trustworthy again.
+  </p>
+
+  <p>
+    But immediately after that, a different kind of problem became obvious.
+    I was spending too much time doing repetitive scene work.
+  </p>
+
+  <p>
+    Duplicating entities, tweaking the same settings over and over, and manually redoing small variations was slowing everything down.
+    The engine could render what I wanted, but authoring scenes still felt like unnecessary friction.
+  </p>
+
+  <p>
+    This dev log is about fixing that.
+    The goal was simple: make it faster to reuse what already works, and make iteration feel natural.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog13_overview.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 2 -->
+<section>
+  <h2>Grayscale Materials With Real Art Direction Controls</h2>
+
+  <p>
+    The first workflow upgrade was adding a grayscale material path that can be remapped into color.
+    The core idea is that a texture does not have to ship with its final look baked in.
+  </p>
+
+  <p>
+    Instead, I can use a single grayscale texture as a stable input, then shape it into different outcomes directly in the editor.
+    This means fewer texture variants, less reauthoring, and faster visual iteration.
+  </p>
+
+  <p>
+    The new controls are intentionally practical.
+    They let me push tone and contrast, then steer the result into a palette, without needing to touch the source file.
+  </p>
+
+  <p>
+    Here is the current control set for the grayscale path, including tint, gamma, bias, and gain.
+    There is also an optional color ramp for remapping black, mid, and white, with a midpoint control.
+  </p>
+
+  <img src="../assets/images/devlog13_grayscale_controls.png" class="devimage" alt="Grayscale material controls in editor">
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <h2>Two Outcomes From One Texture</h2>
+
+  <p>
+    The point of this system is leverage.
+    One texture should be able to serve multiple needs, depending on the scene.
+  </p>
+
+  <p>
+    The controls let me treat grayscale as an authoring foundation.
+    Then tint and remap become decisions that can change per object, per level, or per mood.
+  </p>
+
+  <p>
+    Below are two different outcomes driven by the same grayscale source.
+    This is the kind of iteration speed I wanted.
+  </p>
+
+  <div class="devimage-row">
+    <img src="../assets/images/devlog13_grayscale_outcome_a.png" class="devimage" alt="Grayscale remap outcome A">
+    <img src="../assets/images/devlog13_grayscale_outcome_b.png" class="devimage" alt="Grayscale remap outcome B">
+  </div>
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <h2>Copy and Paste Attributes, Not Just Entities</h2>
+
+  <p>
+    Once materials gained more expressive controls, the next problem showed up fast.
+    I needed a way to reuse work without rebuilding it.
+  </p>
+
+  <p>
+    Duplicating entities helps, but it is not always the right tool.
+    A lot of the time, I only want to copy part of an entity, like its material settings, its transform, or its mesh binding.
+  </p>
+
+  <p>
+    So the editor now supports copying and pasting specific attribute sets.
+    This makes reuse more intentional and reduces the chance of dragging extra state along by accident.
+  </p>
+
+  <p>
+    In practice, it means I can get one object looking right, then propagate that same setup to other objects in seconds.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog13_copy_paste_attributes.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 5 -->
+<section>
+  <h2>Multi-Select Editing for Scene Scale Changes</h2>
+
+  <p>
+    Copy and paste solved part of the speed problem, but scene authoring still had a scale issue.
+    Editing one entity at a time is fine early on, but it does not hold up once scenes grow.
+  </p>
+
+  <p>
+    The scene outliner now supports multi-select, and the inspector supports multi-edit for the relevant properties.
+    That means I can make a single change and apply it across a whole set of entities at once.
+  </p>
+
+  <p>
+    This is the difference between tweaking and designing.
+    When changes apply across a group, the scene starts to evolve as a composition instead of a pile of individual edits.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog13_multiselect_editing.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 6 -->
+<section>
+  <h2>What This Enables: Faster Scene Iteration</h2>
+
+  <p>
+    None of these features exist for their own sake.
+    They exist because I want to build scenes faster and iterate more freely.
+  </p>
+
+  <p>
+    Grayscale remapping cuts down on texture churn.
+    Copy and paste reduces repetitive setup work.
+    Multi-select editing makes scene-wide changes practical.
+  </p>
+
+  <p>
+    Together, these push the engine closer to what I actually need day to day.
+    A tool that lets me reuse decisions and move quickly, without feeling like every change is expensive.
+  </p>
+
+  <video autoplay controls loop muted class="devvideo">
+    <source src="../assets/videos/devlog13_scene_showcase.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 7 -->
+<section>
+  <h2>Next</h2>
+
+  <p>
+    With these editor upgrades in place, it is finally getting easier to build out small levels and visual tests without fighting the tooling.
+    That matters because the next stage is less about rendering experiments and more about building actual game structure on top of a stable foundation.
+  </p>
+
+  <p>
+    The renderer still matters, but now the workflow matters just as much.
+    This is the point where RetroEngine starts shifting from a graphics project into something I can build with consistently.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>
