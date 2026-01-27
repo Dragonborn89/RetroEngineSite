@@ -26,6 +26,52 @@
 
   <section class="log-list">
 
+<!-- Dev Log 14 -->
+<article>
+  <h2>
+    <a href="entry14.html">💡 Dev Log 14 — The Point of Lighting</a>
+    <h4>January 26, 2026</h4>
+    <span class="preview-label">Rendering</span>
+  </h2>
+
+  <p>
+    Up to this point, RetroEngine could render scenes correctly,
+    but they felt flat.
+    Objects felt "floaty".
+    Everything was evenly lit.
+    There was no sense of locality or presence tying things together.
+  </p>
+
+  <p>
+    This dev log is about fixing that without breaking the engine’s core goals.
+    Lighting was added not as a realism upgrade, but as a way to bring the
+    CRT pipeline to life and give scenes emotional weight.
+    The focus stayed on simple, predictable techniques that fit a
+    retro-inspired renderer.
+  </p>
+
+  <p>
+    Point lights were introduced as entity-driven components,
+    allowing localized illumination without a deferred renderer,
+    shadow maps, or heavy ray techniques.
+    To ground objects visually, a cheap but deliberate blob shadow system
+    was layered in: a classic solution that solves most of the problem
+    while keeping performance and behavior easy to reason about.
+  </p>
+
+  <p>
+    Together, these changes make scenes feel less synthetic and more alive,
+    while staying true to the engine’s constraints:
+    no baked lighting, no overengineering, and no effects that fight
+    the retro aesthetic RetroEngine is built around.
+  </p>
+
+  <img src="../assets/images/DevLog14_BlobShadow_variant02.png" alt="Point lights and blob shadows grounding objects in a scene">
+  <a href="entry14.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
+
 <!-- Dev Log 13 -->
 <article>
   <h2>
