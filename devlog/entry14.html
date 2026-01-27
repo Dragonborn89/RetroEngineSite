@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 14. The Point of Lighting</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 14: The Point of Lighting</h1>
+  <h4>January 26th, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- SECTION 1 -->
+<section>
+  <h2>The Point of Lighting</h2>
+
+  <p>
+    This dev log covers some updates to lighting in Retro Game Engine. I currently have just directional lighting and an ambient/fill lighting and they work well together, but they are certainly lacking.
+  </p>
+
+  <p>
+    Everything read, but it was flat.
+    Objects felt floaty.
+    Scenes didn’t have local focus.
+    Nothing in the world was helping me build emotion or art direction. And I really needed to prove to myself that something with story could be contained in this thing I was building.
+  </p>
+
+  <p>
+    I didn’t want a giant lighting system.
+    I wanted the minimum set of tools that makes a scene feel alive and grounded
+    without turning RetroEngine into a general-purpose engine. Something that would let me add life to the world, without tanking performance at the same time.
+  </p>
+
+  <p>
+    Here are a couple examples of where things were when I started this. Directional lighting falls apart indoors as nothing occludes it, so ambient lighting is used to fill it out. 
+    I can alter color/intensity/etc, but its all applied uniformly to the scene and comes across as flat.
+  </p>
+
+
+  <img src="../assets/images/Devlog14_HallwayGold.png" class="devimage" alt="Flat light lighting example 1">
+  <img src="../assets/images/Devlog14_HallwayBlue.png" class="devimage" alt="Flat light lighting example 2">
+</section>
+
+<!-- SECTION 2 -->
+<section>
+  <h2>Constraints Before Features</h2>
+
+  <p>
+    This engine has a job.
+    It’s meant to make a certain kind of game well, and do it in a way that respects the style of 90s hardware
+    without being stuck in the past.
+  </p>
+
+  <p>
+    That means being careful about “standard engine features” that come with a lot of baggage.
+    Lighting is one of those areas where it’s easy to accidentally sign up for a whole second engine.
+  </p>
+
+  <p>
+    So I went into this with a pretty strict set of constraints:
+  </p>
+
+  <ul>
+    <li>No deferred renderer</li>
+    <li>No baked static lighting</li>
+    <li>No shadow maps</li>
+    <li>No real-time ray tracing</li>
+    <li>No “insane ray marching” solutions</li>
+  </ul>
+
+  <p>
+    The goal is a happy middle ground:
+    sell the effect, keep it predictable, and keep it cheap.
+    A lot of this is about getting 80% of the value without paying for 300% of the complexity.
+  </p>
+
+  <p>
+    That’s also why the system is comfortable being a little selective.
+    Lights and shadow-like effects can be prioritized near the camera,
+    because that’s where the player will actually notice them.
+  </p>
+</section>
+
+<!-- SIDEBAR -->
+<section class="devsidebar">
+  <h3>Sidebar: Why Not Shadow Maps?</h3>
+
+  <p>
+    Shadow maps are one of those features that sounds simple on the surface.
+    But my fear was I'd end up dealing with resolution tradeoffs, filtering, shimmering, bias issues,
+    and a bunch of extra pipeline surfaces and passes.
+  </p>
+
+  <p>
+    That work can be worth it.
+    It’s just not the direction I want RetroEngine to drift right now.
+    A lot of that complexity doesn’t help the CRT look.
+    It mostly helps realism. And above all else, this is not an engine aiming to replicate photorealism. Its about soul and artistic style, so I can take a different route.
+  </p>
+
+  <p>
+    Considering all this, the approach I'll follow: keep lighting immediate, local, and controllable.
+    If I need something heavier later, I’d rather arrive there deliberately instead of by accident.
+  </p>
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <h2>Entity-Driven Point Lights</h2>
+
+  <p>
+    The first real upgrade was point lights.
+    Not as a global “lighting system,” but as scene entities.
+  </p>
+
+  <p>
+    That might sound like a small framing detail, but it matters.
+    When lights are entities, they serialize.
+    They’re editable like anything else.
+    They live in the same mental model as meshes, sprites, cameras, and materials.
+  </p>
+
+  <p>
+    And more importantly: they let scenes have local contrast.
+    It’s the first step toward building mood instead of just visibility.
+  </p>
+
+  <img src="../assets/images/Devlog14_FirstLights.png" class="devimage" alt="First point light setup">
+
+  <p>
+    I’m intentionally keeping the controls practical.
+    The point is to place a light, tune its radius and intensity, set its color, and immediately see the scene respond.
+    It should be predictable enough that debugging isn’t a nightmare.
+    Here is the first test adding point lights to the environment I showed earlier.
+  </p>
+
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog14_PointLights01.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <h2>Scenes Were Still Floaty</h2>
+
+  <p>
+    Point lights helped a lot, but the next problem was obvious right away.
+    Even with better shading, objects still felt like they were hovering.
+  </p>
+
+  <p>
+    Realistic shadows would solve that, but realistic shadows also come with a cost I don’t want to pay yet.
+    I needed something that fit the engine’s constraints, fit the retro vibe, and still added a meaningful lift.
+  </p>
+
+  <p>
+    So the next step was a very deliberate, very retro technique: blob shadows.
+  </p>
+</section>
+
+<!-- SECTION 5 -->
+<section>
+  <h2>Blob Shadows as a Stepping Stone</h2>
+
+  <p>
+    Blob shadows don’t try to be physically accurate.
+    They’re about contact.
+    They exist to glue objects to the world so the brain stops questioning everything.
+  </p>
+
+  <p>
+    The implementation is simple on purpose:
+    a textured-free quad projected onto a ground plane, with a radial falloff in the pixel shader.
+    The softness and opacity are tunable, and the fade is based on distance from the ground.
+  </p>
+
+  <p>
+    They’re entity-driven, cheap, and predictable.
+    That makes them a good fit for this engine, and also a good stepping stone for whatever comes later. Here are a couple examples showing them in action.
+  </p>
+
+  <!-- Optional still image -->
+  <img src="../assets/images/DevLog14_BlobShadow_variant01.png" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
+  <img src="../assets/images/DevLog14_BlobShadow_variant02.png" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
+</section>
+
+<!-- SECTION 6 -->
+<section>
+  <h2>The Debugging Part (Because Of Course)</h2>
+
+  <p>
+    Getting blob shadows in wasn’t just “add quad, ship it.”
+    There were a few gotchas that only show up once you’re trying to render more than one.
+  </p>
+
+  <p>
+    The short version: if you’re updating a constant buffer per draw, you need to treat it like per-draw data.
+    Mapping the same upload buffer and overwriting the same memory every iteration means every draw ends up
+    reading the last values you wrote.
+  </p>
+
+  <p>
+    The fix was straightforward once it was obvious:
+    allocate the blob shadow constant buffer with enough space for multiple draws,
+    and use per-draw offsets (aligned to 256 bytes) so each draw has its own slice.
+  </p>
+
+  <img src="../assets/images/Devlog14_RetroGameEngineShadows01.gif" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
+
+  <p>
+    After that, multiple blob shadows render correctly, even when objects are close together and lit by the same point light.
+  </p>
+
+  
+</section>
+
+<!-- SECTION 7 -->
+<section>
+  <h2>Point Lights + Blob Shadows Together</h2>
+
+  <p>
+    This is the part I cared about.
+    Point lights give me local contrast.
+    Blob shadows give me grounding.
+    Together they push scenes into something that feels intentional.
+  </p>
+
+  <p>
+    It’s also the first time the engine starts supporting story and mood instead of just rendering objects correctly.
+    And it does it in a way that still feels retro appropriate: cheap, readable, and focused on the player’s experience.
+  </p>
+
+  <!-- Replace with your looping showcase video -->
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/DevLog14_LightBlobShadows.mp4" type="video/mp4">
+  </video>
+</section>
+
+<!-- SECTION 8 -->
+<section>
+  <h2>Manual Ground Offsets (For Now)</h2>
+
+  <p>
+    The main “complaint” right now is that blob shadows need a ground offset tweak per object.
+    It’s not hard, but it’s manual, and it’s the kind of thing that adds friction when you’re building scenes fast.
+  </p>
+
+  <p>
+    There are a few paths forward.
+    The most obvious one is doing a raycast/trace to find the ground and auto-place the blob shadow.
+    But that assumes a collision representation that’s reliable enough to trust,
+    and I don’t want to bolt on a half-baked collision story just to avoid a slider.
+  </p>
+
+  <p>
+    So the current approach is intentional:
+    keep it simple, keep it predictable, and treat this as a stepping stone.
+    When collision and query systems mature, auto-placement becomes a clean upgrade instead of a hack.
+  </p>
+</section>
+
+<!-- SECTION 9 -->
+<section>
+  <h2>What This Enables</h2>
+
+  <p>
+    Lighting is one of the main ways a scene communicates.
+    Without it, everything feels like a debug view.
+    With it, composition starts to matter.
+  </p>
+
+  <p>
+    The bigger win here isn’t “now RetroEngine has point lights.”
+    It’s that the renderer finally supports building scenes with intent.
+    Local light makes it easier to guide the eye.
+    Ground contact makes it easier to believe what you’re looking at.
+    And the CRT pass finally has something worth chewing on.
+  </p>
+
+  <p>
+    This is still work in progress.
+    But it’s the kind of work that changes what the engine is usable for day to day.
+  </p>
+</section>
+
+<!-- SECTION 10 -->
+<section>
+  <h2>Next</h2>
+
+  <p>
+    I don’t have a clean “next feature” picked out yet.
+    The honest answer is that I want to build more scenes now that lighting isn’t fighting me.
+  </p>
+
+  <p>
+    That’s the real test anyway.
+    If the tools hold up under real use, the next step will reveal itself naturally while I'm off exploring and building.
+    See you next time.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>
