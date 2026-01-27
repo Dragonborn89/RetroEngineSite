@@ -40,7 +40,7 @@
   <p>
     I didn’t want a giant lighting system.
     I wanted the minimum set of tools that makes a scene feel alive and grounded
-    without turning RetroEngine into a general-purpose engine. Something that would let me add life to the world, without tanking performance at the same time.
+    without turning Retro Game Engine into a general-purpose engine. Something that would let me add life to the world, without tanking performance at the same time.
   </p>
 
   <p>
@@ -81,6 +81,20 @@
   </ul>
 
   <p>
+    One practical benefit of these constraints is that the entire lighting
+    system lives in a single render pass.
+    There’s no G-buffer to manage, no lighting accumulation pass,
+    and no synchronization headaches between stages.
+  </p>
+
+  <p>
+    That keeps GPU memory pressure low,
+    makes debugging straightforward,
+    and ensures lighting behaves consistently with the CRT post-process
+    that comes afterward.
+  </p>
+
+  <p>
     The goal is a happy middle ground:
     sell the effect, keep it predictable, and keep it cheap.
     A lot of this is about getting 80% of the value without paying for 300% of the complexity.
@@ -105,7 +119,7 @@
 
   <p>
     That work can be worth it.
-    It’s just not the direction I want RetroEngine to drift right now.
+    It’s just not the direction I want Retro Game Engine to drift right now.
     A lot of that complexity doesn’t help the CRT look.
     It mostly helps realism. And above all else, this is not an engine aiming to replicate photorealism. Its about soul and artistic style, so I can take a different route.
   </p>
@@ -135,6 +149,22 @@
   <p>
     And more importantly: they let scenes have local contrast.
     It’s the first step toward building mood instead of just visibility.
+  </p>
+
+  <p>
+    Under the hood, the lighting model is intentionally simple.
+    It’s classic Lambert diffuse with a small Blinn-Phong specular term,
+    evaluated per pixel.
+    No BRDF stacks, no energy conservation gymnastics.
+    The goal is stability and readability, not physical correctness.
+  </p>
+
+  <p>
+    All point lights are gathered on the CPU each frame,
+    packed into a fixed-size light buffer,
+    and evaluated in a single forward pass.
+    If the scene exceeds the light budget, extra lights simply don’t participate.
+    That tradeoff is explicit and predictable.
   </p>
 
   <img src="../assets/images/Devlog14_FirstLights.png" class="devimage" alt="First point light setup">
@@ -193,6 +223,12 @@
   </p>
 
   <p>
+    The pixel shader never samples a texture, it just computes distance from
+    the quad center and shapes the alpha with a power curve.
+    That keeps the cost flat regardless of shadow size.
+  </p>
+
+  <p>
     Each entity has controls on it for casting a shadow and how it looks, giving me control over the appearance and performance at the same time.
   </p>
 
@@ -212,6 +248,15 @@
   
   <img src="../assets/images/DevLog14_BlobShadow_variant01.png" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
   <img src="../assets/images/DevLog14_BlobShadow_variant02.png" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
+
+  <p class="devnote">
+    Render order matters here:
+    opaque meshes render first with depth writes,
+    blob shadows render next with depth testing but no depth writes,
+    and transparent sprites come last.
+    That ordering keeps contact shadows grounded
+    without interfering with scene geometry.
+  </p>
 </section>
 
 <!-- SECTION 6 -->
@@ -230,9 +275,16 @@
   </p>
 
   <p>
-    The fix was straightforward once it was obvious:
-    allocate the blob shadow constant buffer with enough space for multiple draws,
-    and use per-draw offsets (aligned to 256 bytes) so each draw has its own slice.
+    This is one of those Direct3D 12 rules that doesn’t hurt you
+    until it really hurts you:
+    constant buffers are just memory,
+    and the GPU will happily read whatever happens to be there
+    when the draw executes.
+  </p>
+
+  <p>
+    Treating shadow data as true per-draw state ( with 256-byte aligned slices and explicit offsets)
+    fixed the issue immediately and made the behavior obvious again. This ensure each draw has its own slice.
   </p>
 
   <img src="../assets/images/Devlog14_RetroGameEngineShadows01.gif" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
@@ -300,7 +352,7 @@
   </p>
 
   <p>
-    The bigger win here isn’t “now RetroEngine has point lights.”
+    The bigger win here isn’t “now Retro Game Engine has point lights.”
     It’s that the renderer finally supports building scenes with intent.
     Local light makes it easier to guide the eye.
     Ground contact makes it easier to believe what you’re looking at.
