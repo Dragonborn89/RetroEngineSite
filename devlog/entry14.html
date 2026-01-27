@@ -27,7 +27,7 @@
   <h2>The Point of Lighting</h2>
 
   <p>
-    This dev log covers some updates to lighting in Retro Game Engine. I currently have just directional lighting and an ambient/fill lighting and they work well together, but they are certainly lacking.
+    This dev log covers some updates to lighting in Retro Game Engine. At the start of this dev log, I currently have just directional lighting and an ambient/fill lighting and they work well together, but they are certainly lacking.
   </p>
 
   <p>
@@ -142,6 +142,12 @@
   <p>
     I’m intentionally keeping the controls practical.
     The point is to place a light, tune its radius and intensity, set its color, and immediately see the scene respond.
+    Each point light in the scene can be controlled like this:
+  </p>
+
+  <img src="../assets/images/Devlog14_pointlightcontrols.png" class="devimage" alt="First point light setup">
+
+  <p>
     It should be predictable enough that debugging isn’t a nightmare.
     Here is the first test adding point lights to the environment I showed earlier.
   </p>
@@ -187,11 +193,23 @@
   </p>
 
   <p>
+    Each entity has controls on it for casting a shadow and how it looks, giving me control over the appearance and performance at the same time.
+  </p>
+
+  <img src="../assets/images/Devlog14_ShadowControlsEntity.png" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
+
+  <p>
+    There are also scene-level controls to affect all entities in the scene that are simulating shadows. These let me fine-tune the overall result with ease.
+  </p>
+
+  <img src="../assets/images/Devlog14_shadowscenecontrols.png" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
+
+  <p>
     They’re entity-driven, cheap, and predictable.
     That makes them a good fit for this engine, and also a good stepping stone for whatever comes later. Here are a couple examples showing them in action.
   </p>
 
-  <!-- Optional still image -->
+  
   <img src="../assets/images/DevLog14_BlobShadow_variant01.png" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
   <img src="../assets/images/DevLog14_BlobShadow_variant02.png" class="devimage" alt="Blob shadow grounding a crate on the ground plane">
 </section>
