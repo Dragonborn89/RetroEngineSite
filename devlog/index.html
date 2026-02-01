@@ -26,6 +26,52 @@
 
   <section class="log-list">
 
+<!-- Dev Log 15 -->
+<article>
+  <h2>
+    <a href="entry15.html">🧩 Dev Log 15 — Scrolling Through Chunks</a>
+    <h4>February 1, 2026</h4>
+    <span class="preview-label">Editor & Materials</span>
+  </h2>
+
+  <p>
+    This dev log covers a week where the focus was not on adding some 
+    fun features, and removing lots of friction.
+    As I started building more real spaces inside RetroEngine,
+    small limitations kept surfacing and slowing everything down.
+  </p>
+
+  <p>
+    The first set of changes grew out of material authoring.
+    Animated UVs were unified across sprites and meshes,
+    turning scrolling textures into a true material feature instead of a special case.
+    At the same time, alpha cutout was added with deliberate constraints,
+    favoring predictable, era-correct behavior that works with the CRT pipeline
+    instead of fighting it.
+  </p>
+
+  <p>
+    From there, the work shifted into editor tooling.
+    Smarter duplication exposed the need for real spatial understanding,
+    which led to geometry-aware placement, reusable content chunks,
+    and multi-entity editing without introducing heavy prefab systems
+    or new runtime complexity.
+  </p>
+
+  <p>
+    Taken together, these changes are about scaling the engine responsibly.
+    RetroEngine remains opinionated and constrained on purpose,
+    but it is becoming faster and more comfortable to build with.
+    The goal is still the same:
+    let simple systems do real work without turning the editor into a second engine.
+  </p>
+
+  <img src="../assets/images/Devlog15_chunk.png" alt="Reusable chunks and smart duplication inside the RetroEngine editor">
+
+  <a href="entry15.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
 <!-- Dev Log 14 -->
 <article>
   <h2>
