@@ -26,6 +26,64 @@
 
   <section class="log-list">
 
+
+<!-- Dev Log 16 -->
+<article>
+  <h2>
+    <a href="entry16.html">📐 Dev Log 16 — Building on a Plane</a>
+    <h4>February 8, 2026</h4>
+    <span class="preview-label">Editor & Placement</span>
+  </h2>
+
+  <p>
+    This dev log focuses on a deceptively simple goal:
+    making placement inside RetroEngine feel physical instead of list-driven.
+    What started as “just a construction grid” quickly turned into a stress test
+    for the editor, the renderer, and some long-standing assumptions about how
+    temporary data should interact with the GPU.
+  </p>
+
+  <p>
+    The construction grid itself is intentionally minimal.
+    It is editor-only, owns no entities, and does not exist at runtime.
+    Given a camera and a mouse ray, it answers one question:
+    where would this land?
+    That small shift unlocked a more tactile way to assemble spaces
+    without introducing a second scene graph or heavy gizmo systems.
+  </p>
+
+  <p>
+    From there, chunk placement needed clearer rules.
+    Explicit chunk anchors were introduced to define pivots without adding
+    hierarchy or hidden ownership.
+    Chunks remain plain data — reusable, instanced, and disposable —
+    but now spawn deterministically and predictably on the grid.
+  </p>
+
+  <p>
+    The real challenge came with live previews.
+    Rendering chunks before placement sounds trivial,
+    but doing it safely in Direct3D 12 forced stricter boundaries
+    between editor and runtime rendering.
+    The end result is a preview system that uses the same mesh path as real entities,
+    but with disciplined resource ownership and no mutation of scene state.
+  </p>
+
+  <p>
+    This log also marks roughly 100 days of work on RetroEngine!
+    The features are getting quieter,
+    but the engine itself is getting stronger.
+    Fewer fragile edges.
+    Clearer rules.
+    Faster iteration.
+  </p>
+
+  <img src="../assets/images/Devlog16_ConstructionGrid01.png" alt="Construction grid and chunk placement inside the RetroEngine editor">
+
+  <a href="entry16.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
 <!-- Dev Log 15 -->
 <article>
   <h2>
