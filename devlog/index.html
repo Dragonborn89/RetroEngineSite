@@ -26,6 +26,52 @@
 
   <section class="log-list">
 
+<!-- Dev Log 17 -->
+<article>
+  <h2>
+    <a href="entry17.html">🌍 Dev Log 17 — On Rocky Ground</a>
+    <h4>February 17, 2026</h4>
+    <span class="preview-label">Terrain & Streaming</span>
+  </h2>
+
+  <p>
+    Indoor chunk tools exposed something I had been ignoring:
+    everything outside still sat on an infinite flat plane.
+    That was fine for debugging, but not for building real spaces.
+    This week, the chunk system quietly evolved into something much larger:
+    a procedural terrain system built on the same entity pipeline as everything else.
+  </p>
+
+  <p>
+    Terrain in RetroEngine does not get a special renderer or hidden pass.
+    Each terrain chunk is just a normal <strong>SceneEntity</strong> with a generated mesh.
+    That decision kept the renderer simple,
+    but it forced discipline around ownership, lifetime, and serialization.
+    Several subtle bugs surfaced along the way.
+  </p>
+
+  <p>
+    Terrain is serialized as parameters only:
+    seed, frequency, amplitude, resolution, shading flags.
+    No mesh blobs on disk.
+    From that small block of data, an entire world can regenerate.
+  </p>
+
+  <p>
+    With deterministic generation in place,
+    streaming naturally followed.
+    The camera’s world position maps to chunk coordinates,
+    and a square region of terrain updates around it.
+    Fly forward and the world keeps building itself —
+    all derived from a handful of numbers saved in the scene file.
+  </p>
+
+  <img src="../assets/images/Devlog17_TerrainControls.png" alt="Procedural terrain controls inside the RetroEngine editor">
+
+  <a href="entry17.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
 
 <!-- Dev Log 16 -->
 <article>

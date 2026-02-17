@@ -335,3 +335,13 @@ section {
   height: 100%;
   border: none;
 }
+
+/* dev note */
+.devnote {
+  font-size: 14px;
+  opacity: 0.8;
+  text-align: center;
+  margin-top: -1em;
+  margin-bottom: 2em;
+  color: #9ffff0;
+}

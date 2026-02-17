@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 17. On Rocky Ground</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 17: On Rocky Ground</h1>
+  <h4>February 17th, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<section>
+  <h2>Indoor Tools Exposed an Outdoor Problem</h2>
+
+  <p>
+    Last week was about chunks as authoring tools. Setup anchors, snap to grid, visualize previews, that all works great.
+  </p>
+
+  <p>
+    That solved indoor assembly. I could build enclosed spaces quickly without fighting transforms.
+    But the moment I tried to build anything outdoors, the illusion broke.
+  </p>
+
+  <p>
+    Everything sat on an infinite flat plane.
+  </p>
+
+  <p>
+    Fine for debugging. Not fine for real environments. And right now everything I’m building needs to move toward an actual playable prototype.
+  </p>
+
+  <p>
+    I also didn’t want to manually model giant terrain meshes just to test outdoor ideas.
+    If I’m building my own engine, it should help me here.
+  </p>
+
+  <p>
+    So the chunk system quietly turned into something much bigger.
+  </p>
+</section>
+
+<section>
+  <h2>A World Chunk System</h2>
+
+  <p>
+    The original chunk feature was an authoring convenience that let me rapidly save a group of entities and re-instantiate them easily.
+  </p>
+
+  <p>
+    Terrain chunks are different.
+    They’re spatial partitions that own procedural geometry.
+  </p>
+
+  <p>
+    I resisted building a separate “terrain pipeline.”
+    Terrain does not get a special pass.
+    Each chunk simply spawns a normal SceneEntity at runtime with a generated mesh attached.
+  </p>
+
+  <p>
+    It renders through the exact same SceneRenderer path as everything else.
+    No terrain-only branch. No hidden paths. It is important with such a large project to constantly make sure things stay in aligment and don't spiral, making the project unsustainable.
+  </p>
+</section>
+
+<section>
+  <h2>The First Test</h2>
+
+  
+
+  <p>
+    The first version technically worked.
+  </p>
+
+  <p>
+    You could tweak seed and frequency and it would regenerate.
+    That was about it. Here is the new terrain editor and its controls:
+  </p>
+
+  <img src="../assets/images/Devlog17_TerrainControls.png" class="devimage" alt="Terrain controls UI"> 
+
+  <p>
+    But it proved the one thing that mattered:
+    the mesh builder was deterministic.
+  </p>
+
+  <p>
+    Given a seed and chunk coordinate, it always built the same geometry.
+    That’s what makes streaming possible.
+  </p>
+
+  <p>
+    And importantly, this small block of terrain data is all that gets saved in a scene.
+    From that alone, the world can rebuild itself.
+  </p>
+
+  
+
+  <p>
+    Early terrain controls in the editor. Basic, but functional. There are some small visual bugs here too initially, but I would get those quickly.
+  </p>
+
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog17 Terrain Firsttest.mp4" type="video/mp4">
+  </video>
+  <p class="devnote">
+    First successful terrain generation. Noise only. No color control.
+    Lighting was off. Seams were obvious.
+  </p>
+</section>
+
+<section>
+  <h2>Seams and Lighting (And Why They Happened)</h2>
+
+  <p>
+    The first obvious problem was seams between chunks.
+  </p>
+
+  <p>
+    The heights were correct.
+    The normals were not.
+  </p>
+
+  <p>
+    Each chunk computed normals locally, unaware of its neighbors.
+    That meant border vertices matched in height but disagreed in lighting.
+  </p>
+
+  <p>
+    The fix wasn’t stitching geometry together.
+    It was sampling everything in world space.
+  </p>
+
+  <p>
+    Chunk coordinates are converted into world-space offsets before noise is evaluated.
+    Border vertices sample identical input values.
+    Normals derive from the same global height field.
+  </p>
+
+  <p>
+    Once everything referenced the same coordinate space, the seams disappeared.
+  </p>
+
+  <p>
+    Lighting instability came from something else.
+  </p>
+
+  <p>
+    Terrain meshes initially didn’t supply a valid local AABB.
+    That broke assumptions in culling and lighting.
+  </p>
+
+  <p>
+    Once the mesh builder returned a proper bounding box and that was assigned to the SceneEntity,
+    frustum behavior stabilized and lighting became predictable.
+  </p>
+
+  <p>
+    Nothing dramatic.
+    Just systems disagreeing about space and lifetime.
+  </p>
+</section>
+
+<section>
+  <h2>The Bugs That Forced Discipline</h2>
+
+  <p>
+    The hardest bugs weren’t visual.
+    They were structural.
+  </p>
+
+  <p>
+    Old scenes suddenly had terrain entities in them even though terrain was disabled.
+    Debug cubes showed up in the outliner.
+    Entity IDs were being reused in ways I didn’t anticipate.
+  </p>
+
+  <p>
+    At one point, unrelated scene entities were being hijacked because their IDs matched a previous terrain entity.
+  </p>
+
+  <img src="../assets/images/Devlog17_BrokenScenes.jpg" class="devimage" alt="Terrain data in scene JSON">
+
+  <p>
+    That was a fun evening.
+  </p>
+
+  <p>
+    The fixes were simple, just not glamorous:
+  </p>
+
+  <ul>
+    <li>Terrain entities validate their own name before reattaching to an ID.</li>
+    <li>Chunk debug entities are destroyed immediately when not visible.</li>
+    <li>SceneGraph::Clear() resets terrain state alongside lighting and entities.</li>
+    <li>Terrain only updates when <code>terrain.enabled</code> is true.</li>
+    <li>Enable/disable transitions force a clean rebuild.</li>
+  </ul>
+
+  <p>
+    It took a few iterations to reach a stable point:
+  </p>
+
+  <ul>
+    <li>Old scenes load clean.</li>
+    <li>Scenes without terrain stay clean.</li>
+    <li>Editor and runtime behave identically.</li>
+  </ul>
+
+  <p>
+    That last one matters.
+    I don’t want two engines hiding in one project.
+  </p>
+</section>
+
+<section>
+  <h2>What Actually Gets Saved</h2>
+
+  <img src="../assets/images/Devlog17_TerrainSceneJson.png" class="devimage" alt="Terrain data in scene JSON">
+
+  <p>
+    Terrain is not serialized as geometry.
+  </p>
+
+  <p>
+    The scene file stores only parameters:
+    enabled flag, radius, seed, amplitude, frequency, resolution, and shading values.
+  </p>
+
+  <p>
+    On load, the chunk manager regenerates everything.
+  </p>
+
+  <p>
+    No mesh blobs.
+    No cached terrain files.
+    Just deterministic parameters.
+  </p>
+
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog17 Terrain Saveload.mp4" type="video/mp4">
+  </video>
+
+  <p class="devnote">
+    Terrain now persists with scenes and rebuilds reliably.
+  </p>
+</section>
+
+<section>
+  <h2>Streaming</h2>
+
+  <p>
+    Once regeneration was reliable, streaming became obvious.
+  </p>
+
+  <p>
+    The camera’s world position is converted into chunk grid coordinates
+    by dividing by chunk size and flooring the result.
+    That becomes the active center.
+  </p>
+
+  <p>
+    A square region of chunks is maintained around that center.
+    If a chunk exits the radius, it is destroyed after a GPU flush.
+    If a chunk enters the region and doesn’t exist, it is generated on demand.
+  </p>
+
+  <p>
+    There’s no rolling buffer.
+    No shifting origin.
+    No accumulated drift.
+  </p>
+
+  <p>
+    A chunk at coordinate (12, -3) will always generate the same geometry,
+    whether you walk there or teleport instantly.
+  </p>
+
+  <p>
+    That determinism is what makes endless travel possible.
+  </p>
+
+  <p>
+    Right now the streaming region is square.
+    Circular logic will come later.
+    Square is easier to reason about while stabilizing the system.
+  </p>
+
+  <p>
+    And it works the same in editor and runtime.
+    Same manager. Same lifecycle.
+  </p>
+
+  <p>
+    I can fly a basic ship forward and the world keeps generating.
+    And the entire thing is derived from a handful of saved parameters.
+  </p>
+
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog17 Terrain Streamingflight.mp4" type="video/mp4">
+  </video>
+
+  <p class="devnote">
+    Chunks streaming in and out around the camera.
+  </p>
+</section>
+
+<section>
+  <h2>Shading</h2>
+
+  <p>
+    Terrain currently supports:
+  </p>
+
+  <ul>
+    <li>Lit or unlit shading</li>
+    <li>Base color</li>
+  </ul>
+
+  <p>
+    A previous “terrain bleeding” bug revealed that terrain entities already flowed through the same material pipeline as regular meshes.
+  </p>
+
+  <p>
+    Once lifecycle bugs were fixed, terrain inherited lighting and shading automatically.
+  </p>
+
+  <p>
+    In the near future I'd like to expand the material attributes for terrain even more to match what can be done with regular entities.
+  </p>
+</section>
+
+<section>
+  <h2>Lessons</h2>
+
+  <p>
+    This wasn’t so much about learning noise functions, instead it was about really understanding ownerhip within the engine.
+  </p>
+
+  <p>
+    The chunk manager owns lifecycle.
+    The scene graph owns data.
+    The renderer stays dumb.
+  </p>
+
+  <p>
+    Every time I blurred those boundaries, things broke in strange ways.
+  </p>
+
+  <p>
+    When the separation was strict, bugs became obvious.
+  </p>
+
+  <p>
+    And as usual, Direct3D 12 does not forgive lifetime mistakes.
+    If you free a mesh while the GPU is using it,
+    it doesn’t complain politely.
+  </p>
+
+  <p>
+    It just ends you.
+  </p>
+</section>
+
+<section>
+  <h2>Next</h2>
+
+  <p>
+    Terrain is stable enough to use.
+    That’s the bar for now.
+  </p>
+
+  <p>
+    Next is expanding terrain materials to match the regular material pipeline.
+  </p>
+
+  <p>
+    After that, likely sculpting and collision.
+    Or something else entirely.
+    The engine tends to decide what needs attention next.
+  </p>
+
+  <p>
+    Thanks for following along.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>
