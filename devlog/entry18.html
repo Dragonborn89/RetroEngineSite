@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 18. Shared or Die</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 18: Shared or Die</h1>
+  <h4>February 24rd, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<section>
+  <h2>Terrain Grew Up</h2>
+
+  <p>
+    So in the last log, we ended with terrain stable and streaming.
+  </p>
+
+  <p>
+    Chunks regenerate deterministically, which keeps things consistent. I set up normals in world-space after generating the terrain meshes, and bounding boxes are now generated correctly.
+    The part I'm most excited about though is that the editor and runtime behave the same. That level of parity is something I always want so editor experiences and gameplay match 1:1.
+  </p>
+
+  <p>
+    At this point terrain only supported a base color.
+  </p>
+
+  <p>
+    The obvious next step was letting terrain use a real albedo texture,
+    just like any other mesh in the engine. 
+  </p>
+
+  <p>
+    The material pipeline already existed.
+    Terrain entities flow through the same SceneRenderer path.
+    So this should have been trivial.
+  </p>
+
+  <p>
+    It was not trivial.
+  </p>
+</section>
+
+<section>
+  <h2>What Actually Happened</h2>
+
+  <p>
+    I expanded the terrain data and editor side to support assigning textures, and decided a good first test was to assign a 4096×4096 texture to terrain. 
+    Just to really see what it could handle at this point, how long it took to apply, etc. Set the albedo texture in the editor and then...
+  </p>
+
+  <p>
+    The engine froze. For awhile. After a few moments I finally get the log pulled up:
+  </p>
+
+  <pre>
+E_OUTOFMEMORY
+DXGI_ERROR_DEVICE_RESET
+  </pre>
+
+  <p>
+    The log told the real story as I dug into it.
+  </p>
+
+  <pre>
+[TextureCache] Loaded+cached: ... 4096x4096 ...
+[TextureCache] Loaded+cached: ... 4096x4096 ...
+[TextureCache] Loaded+cached: ... 4096x4096 ...
+(repeated thousands of times)
+  </pre>
+
+  <p>
+    Every terrain chunk was loading its own copy of the texture!
+  </p>
+
+  <p>
+    Let’s do the math:
+  </p>
+
+  <pre>
+4096 × 4096 × 4 bytes ≈ 64 MB
+64 MB × ~3000 chunks ≈ 192 GB
+  </pre>
+
+  <p>
+    The GPU didn’t misbehave.
+    It refused. At this time I'm testing with a 64gb which is queit decent, so this exposed a giant crack in my engine.
+  </p>
+</section>
+
+<section>
+  <h2>The Mistake</h2>
+
+  <p>
+    This was the old pattern:
+  </p>
+
+<pre>
+if (!entity.albedoLoaded)
+{
+    LoadTexture2D(...);
+    entity.albedoLoaded = true;
+}
+</pre>
+
+  <p>
+    That works when you have ten entities. Even a hundred was fine.
+  </p>
+
+  <p>
+    Terrain streaming meant hundreds or even thousands though.
+  </p>
+
+  <p>
+    I was treating textures as if they were owned per entity.
+  </p>
+
+  <p>
+    They were, but they shouldn't be.
+  </p>
+
+  <p>
+    Textures should be shared resources.
+  </p>
+</section>
+
+<section>
+  <h2>The Texture Cache</h2>
+
+  <p>
+    The fix wasn’t reducing texture size.
+    It wasn’t limiting chunk count.
+  </p>
+
+  <p>
+    It was changing ownership.
+  </p>
+
+  <p>
+    The Retro Game Engine now maintains a global texture cache:
+  </p>
+
+<pre>
+std::unordered_map&lt;std::wstring, Entry&gt; m_entries;
+</pre>
+
+  <p>
+    Lookup looks like this:
+  </p>
+
+<pre>
+const std::wstring key = NormalizeKey(assetPath);
+
+auto it = m_entries.find(key);
+if (it != m_entries.end())
+{
+    outEntry = it->second;
+    return true;
+}
+</pre>
+
+  <p>
+    Only if the key does not exist do we actually load:
+  </p>
+
+<pre>
+LoadTexture2D_Helper(m_device, cmdList, key.c_str(), e.resource);
+m_entries.emplace(key, e);
+</pre>
+
+  <p>
+    One texture. One SRV. Shared by every chunk.
+  </p>
+</section>
+
+<section>
+  <h2>Normalization (Quiet but Critical)</h2>
+
+  <p>
+    Keying by path only works if paths are deterministic.
+  </p>
+
+  <p>
+    This became the canonical normalization:
+  </p>
+
+<pre>
+std::wstring TextureCache::NormalizeKey(const std::wstring&amp; path) const
+{
+    std::wstring full = ResolveAssetPathW(path);
+
+    for (auto&amp; ch : full)
+        if (ch == L'/') ch = L'\\';
+
+    for (auto&amp; ch : full)
+        if (ch &gt;= L'A' &amp;&amp; ch &lt;= L'Z')
+            ch = wchar_t(ch - L'A' + L'a');
+
+    return full;
+}
+</pre>
+
+  <p>
+    Everything defers to this.
+  </p>
+
+  <p>
+    Renderer pruning.
+    Editor usage stats.
+    Cache lookup.
+  </p>
+
+  <p>
+    There is exactly one truth for a texture key.
+  </p>
+</section>
+
+<section>
+  <h2>Clearing Is Not Safe</h2>
+
+  <p>
+    I originally added a “Clear Texture Cache” button.
+  </p>
+
+  <p>
+    Pressing it mid-frame caused immediate crashes.
+  </p>
+
+  <p>
+    That was correct behavior I soon learned.
+    The GPU was still using those descriptors which causes a lot issues when they are modified at that stage.
+  </p>
+
+  <p>
+    The correct solution became pruning:
+  </p>
+
+<pre>
+void Renderer::PruneTexturesForScene(const SceneGraph&amp; graph)
+{
+    WaitForPreviousFrame();
+
+    std::unordered_set&lt;std::wstring&gt; used;
+
+    for (const SceneEntity&amp; e : graph.entities)
+    {
+        if (!e.albedoPath.empty())
+            used.insert(m_textureCache-&gt;NormalizeForLookup(e.albedoPath));
+    }
+
+    m_textureCache-&gt;PruneUnused(used);
+}
+</pre>
+
+  <p>
+    No destruction while in-flight.
+    No undefined behavior.
+  </p>
+
+  <p>
+    Huge improvement. It’s almost boring how dramatic the difference is.
+    Went from D3D12 errors to 1k FPS.
+  </p>
+
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog18_cachedtexturesterrain.mp4" type="video/mp4">
+  </video>
+</section>
+
+<section>
+  <h2>Debugging What You Can’t See</h2>
+
+  <p>
+    Fixing the architecture wasn’t enough.
+    I wanted visibility.
+  </p>
+
+  <img src="../assets/images/Devlog18_texcacheui.png" class="devimage" alt="Texture Cache Debug UI">
+
+  <p>
+    The editor now reports:
+  </p>
+
+  <ul>
+    <li>Global texture memory (estimated from width × height × format)</li>
+    <li>Scene-only memory usage</li>
+    <li>SRV heap allocation count</li>
+    <li>DXGI format</li>
+    <li>Instance count per texture</li>
+  </ul>
+
+  <p>
+    Entries are color-coded:
+  </p>
+
+  <ul>
+    <li>Teal — normal</li>
+    <li>Orange — mild threshold</li>
+    <li>Red — extreme threshold</li>
+  </ul>
+
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog18 Texturecacheui.mp4" type="video/mp4">
+  </video>
+
+  <p class="devnote">
+    Texture cache debug panel. Scene filter enabled.
+  </p>
+
+  <p>
+    Seeing memory pressure directly in the editor changes how you build in real-time.
+    It lets me (and any other user) immediately see the impact of an assigned texture.
+  </p>
+</section>
+
+<section>
+  <h2>Why This Was Important to Me</h2>
+
+  <p>
+    GPU prices have not returned to where they were five or six years ago.
+  </p>
+
+  <p>
+    During the 2020–2022 supply chain crunch, mid-range GPUs doubled or tripled in price.
+    Even after stabilization, modern cards remain significantly more expensive than their predecessors at equivalent tiers as AI demands more and more.
+  </p>
+
+  <p>
+    Testing on a bottom-tier RDNA2 iGPU and holding 60 FPS confirms that the architecture decisions are working.
+  </p>
+
+  <p>
+    It has to respect memory and behave predictably.
+    My goal is simple: low-end hardware should be able to develop and run games in this engine without fighting it.
+  </p>
+
+  <p>
+    Accidentally attempting 192GB of allocations isn’t just a bug,
+    it’s the opposite of the engine’s goal.
+  </p>
+</section>
+
+<section>
+  <h2>Now</h2>
+
+  <p>
+    Terrain now supports high-resolution textures safely.
+  </p>
+
+  <p>
+    Chunks stream.
+    Textures load once.
+    Memory stays flat.
+  </p>
+
+  <p>
+    The engine didn’t get flashier.
+    It got stricter.
+  </p>
+</section>
+
+<section>
+  <h2>Low-End Reality Check</h2>
+
+  <p>
+    After stabilizing the texture cache, I moved testing to a deliberately weak machine.
+  </p>
+
+  <p>
+    AMD Ryzen 5 7535U<br>
+    Radeon 660M (6 RDNA2 CUs, integrated graphics)<br>
+    Shared system memory<br>
+    60Hz locked panel
+  </p>
+
+  <p>
+    This GPU sits roughly in the bottom 10–15% of Steam hardware as of early 2026.
+    It’s not a gaming laptop. It’s a thin and light with an iGPU.
+  </p>
+
+  <p>
+    With textured terrain, streaming active, and no further optimization passes like instancing or aggressive culling —
+    the engine holds a steady 60 FPS!
+  </p>
+
+  <img src="../assets/images/Devlog18_lowendtest.jpg" class="devimage" alt="Textured terrain in RetroEngine">
+
+  <p>
+    That's the bar.
+  </p>
+
+  <p>
+    If the worst-case hardware runs stable at 60,
+    then 85–90% of Steam users with discrete GPUs are going to run significantly above that.
+  </p>
+
+  <p>
+    The texture cache wasn’t just about fixing a crash.
+    It was about flattening memory behavior so performance doesn’t spike unpredictably.
+  </p>
+</section>
+
+<section>
+  <h2>Render Style: Quantization & Dither</h2>
+
+  <p>
+    While stabilizing memory, I also added something intentionally destructive.
+  </p>
+
+  <p>
+    Scene-level color quantization and ordered dither.
+  </p>
+
+  <p>
+    These are not post-process filters.
+    They are part of the lighting pipeline.
+  </p>
+
+  <p>
+    A new constant buffer was introduced:
+  </p>
+
+<pre>
+struct SceneStyleCB
+{
+    int   quantLevels;
+    int   quantEnabled;
+    int   ditherEnabled;
+    float ditherStrength;
+};
+</pre>
+
+  <p>
+    Bound at register <code>b3</code> in both mesh and sprite pipelines.
+  </p>
+
+  <p>
+    In the pixel shader, degradation happens after lighting and emissive:
+  </p>
+
+<pre>
+if (quantEnabled != 0 && quantLevels > 1)
+{
+    float levels = (float)quantLevels;
+    color.rgb = floor(color.rgb * levels) / levels;
+}
+</pre>
+
+  <p>
+    Before quantization, we bias using a 4×4 Bayer matrix:
+  </p>
+
+<pre>
+static const float4x4 bayer4 = {
+    0.0/16.0,  8.0/16.0,  2.0/16.0, 10.0/16.0,
+   12.0/16.0,  4.0/16.0, 14.0/16.0,  6.0/16.0,
+    3.0/16.0, 11.0/16.0,  1.0/16.0,  9.0/16.0,
+   15.0/16.0,  7.0/16.0, 13.0/16.0,  5.0/16.0
+};
+</pre>
+
+  <p>
+    Final per-pixel order:
+  </p>
+
+  <pre>
+Lighting → Emissive → Dither Bias → Quantization → CRT Pipeline
+  </pre>
+
+  <p>
+    The CRT simulation remains untouched.
+    It operates on the degraded signal.
+  </p>
+
+  <p>
+    These controls are scene-level, not per-material.
+    The entire world shares the same degradation profile.
+  </p>
+
+  <p>
+    That keeps the behavior deterministic.
+    And performance predictable.
+  </p>
+
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog18 Quant.mp4" type="video/mp4">
+  </video>
+</section>
+
+<section>
+  <h2>Current Status</h2>
+
+  <p>
+    The chunk manager now owns the lifecycle for terrain meshes.
+  </p>
+
+  <p>
+    The texture cache owns GPU texture lifetime.
+  </p>
+
+  <p>
+    Entities reference them.
+  </p>
+
+  <p>
+    That separation is not optional.
+  </p>
+
+  <p>
+    This was one of the more important upgrades the Retro Game Engine has had so far.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>

@@ -20,11 +20,72 @@
 
 <main>
   <section class="intro">
-    <p>Follow the ongoing development of <strong>RetroEngine</strong>, a physically accurate CRT renderer built in DirectX 12.  
-    Each log explores the journey from raw beam simulation to a living, analog-inspired rendering engine.</p>
-  </section>
+  <p>
+    Follow the ongoing development of <strong>Retro Game Engine</strong>,
+    a DirectX 12 rendering engine built around strict resource ownership,
+    deterministic scene systems, and analog-inspired output.
+  </p>
 
-  <section class="log-list">
+  <p>
+    What started as a physically grounded CRT renderer has grown into
+    a full rendering pipeline with procedural terrain, streaming,
+    texture lifetime management, and scene-level retro degradation controls.
+  </p>
+
+  <p>
+    Each dev log documents the real engineering work behind it.
+    The mistakes, the fixes, the architectural decisions,
+    and the performance validation on low-end hardware.
+  </p>
+</section>
+
+<section class="log-list">
+
+<!-- Dev Log 18 -->
+<article>
+  <h2>
+    <a href="entry18.html">🧠 Dev Log 18 — Shared or Die</a>
+  </h2>
+  <h4>February 24, 2026</h4>
+  <span class="preview-label">Texture Cache & Render Style</span>
+
+  <p>
+    Adding high-resolution textures to streaming terrain exposed a serious architectural flaw:
+    every chunk was loading its own copy of the same 4K texture.
+    The result was predictable (to some), GPU memory exhaustion and a hard device reset.
+  </p>
+
+  <p>
+    This log documents the shift from per-entity texture ownership
+    to a global texture cache with deterministic key normalization
+    and safe pruning tied to scene state.
+    One texture. One SRV. Shared across all terrain chunks.
+  </p>
+
+  <p>
+    A new editor debug panel now exposes global and scene-only texture memory,
+    instance counts, SRV usage, and live filtering.
+    What used to be invisible GPU pressure is now measurable in real time.
+  </p>
+
+  <p>
+    The update was validated on a low-end RDNA2 integrated GPU,
+    holding a stable 60 FPS with streaming terrain active.
+    Stability and predictability are the goal, not chasing peak hardware.
+  </p>
+
+  <p>
+    This log also introduces scene-level color quantization and ordered dither,
+    integrated directly into the lighting pipeline.
+    Retro degradation is now deterministic, editor-driven,
+    and applied uniformly across both mesh and sprite paths.
+  </p>
+
+  <img src="../assets/images/Devlog18_texcacheui.png" alt="Texture cache debug panel inside the RetroEngine editor">
+
+  <a href="entry18.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
 
 <!-- Dev Log 17 -->
 <article>
