@@ -41,6 +41,60 @@
 
 <section class="log-list">
 
+<!-- Dev Log 19 -->
+<article>
+  <h2>
+    <a href="entry19.html">🌫️ Dev Log 19 — Foggy Times</a>
+  </h2>
+  <h4>March 4, 2026</h4>
+  <span class="preview-label">Atmospheric Rendering</span>
+
+  <p>
+    As RetroEngine's terrain streaming matured, something became painfully obvious:
+    the outdoor scenes were too perfect.
+    Infinite clarity sounds nice on paper, but in practice it makes worlds feel flat,
+    artificial, and exposes every terrain pop and draw distance limit.
+  </p>
+
+  <p>
+    Looking back at older games revealed the missing ingredient.
+    Titles like <em>Star Wars: Rogue Squadron</em> used atmospheric fog not just to hide
+    hardware limitations, but to ground environments and create believable scale.
+    Distance and height-based fog gave the horizon weight,
+    letting the world fade naturally instead of ending abruptly.
+  </p>
+
+  <p>
+    This log covers the implementation of a scene-level fog system
+    built as a fullscreen pass that reconstructs world position from depth
+    and applies both distance fog and height fog in a single calculation.
+    The system integrates directly into the scene renderer,
+    running before the CRT simulation stage so it behaves like real atmosphere,
+    not a screen-space filter.
+  </p>
+
+  <p>
+    Several subtle bugs surfaced during development:
+    fog disappearing under orthographic cameras,
+    sky geometry unexpectedly controlling fog visibility,
+    and a particularly nasty constant-buffer layout mismatch
+    that produced intermittent artifacts and corrupted reconstruction.
+  </p>
+
+  <p>
+    The final system is deterministic, scene-controlled,
+    and extremely cheap to render.
+    One fullscreen triangle, one depth read per pixel,
+    and zero work when fog is disabled.
+    The result is a renderer that finally feels like it exists inside an atmosphere.
+  </p>
+
+  <img src="../assets/images/devlog19_fogterraincomp.png alt="Terrain with atmospheric fog in RetroEngine">
+
+  <a href="entry19.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
 <!-- Dev Log 18 -->
 <article>
   <h2>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 19. Atmospheric Fog</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 19: Foggy Times</h1>
+  <h4>March 5th, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<section>
+  <h2>Seeing Through the Mist</h2>
+
+  <p>
+    Retro Game Engine is getting to the point where lighting and materials behave consistently enough that you can actually start judging the scene itself.
+    I started doing things like streaming in terrain chunks, and suddenly I have lots of popping visble. I had been playing some older games recently that had large maps with terrain
+    so I studyied them to see how they were handling it. 
+ </p>
+  <p>
+     I started playing Star Wars: Rogue Squadron on the N64 and it was clear right away how they were implementing fog to both help with visual
+    popping AND with just grounding the environment and making things feel more cohesive in general. I noticed some distance-based kind of fog at play, but also some height to it, such That
+    the horizon was obscured. It made the world feel more immersed and seemed like something to analyze and see how my engine should handle these kinds of things. If you haven't played it in a while, 
+    it still holds up surprisingly well. The maps feel huge, you can fly around freely, and the environments somehow feel grounded despite the hardware limitations.
+ </p>
+ <!-- Video of flying through Star Wars Rogue Squadron via CRT + N64, showing fog  -->
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog19 Swroguesquad.mp4" type="video/mp4">
+  </video>
+  <p class="devnote">
+  Reference: Rogue Squadron running on a real N64 + CRT. Notice how the fog obscures the horizon and softens terrain popping.
+  </p>
+
+  <p>
+    When I look at my game engine, even though there is a CRT simulation and noise, everything was too clean.
+    Indoors, things feel okay, but the second I'm outside and looking at terrain, the facade falls apart. 
+  </p>
+
+  <p>
+    Distance didn’t feel like distance, it was hard to really perceive how far or large something was.
+    The world had no atmosphere to it. Lighting helped a lot, but I realized the fog was being used for building the world(s) in Rogue Squadron.
+    Things like the opacity, falloff distance, and color all played into the mood and made things feel more unique. 
+    I needed this. 
+  </p>
+
+  <img src="../assets/images/devlog19_fogterrainoff.png" class="devimage" alt="Example of terrain with no fog in Retro Game Engine">
+
+  <p>
+    As I sat down to think about how I'd add this to my game engine, it seemed relatively simple on the surface. I've done things like build distance based fog in Unreal Engine,
+    using things like post process and sphere masks for example.
+    I think I understand the components, but there is probably something I'm not thinking of that will come back to bite me.
+    If you've done graphics programming before, you probably already know what it is.
+  </p>
+
+</section>
+
+<section>
+  <h2>The Goal</h2>
+
+  <p>
+    I wanted fog that:
+  </p>
+
+  <ul>
+    <li>is controlled per scene (not per material)</li>
+    <li>adds depth without expensive volumetrics</li>
+    <li>works in both perspective and orthographic cameras</li>
+    <li>behaves the same in editor and runtime</li>
+    <li>stays deterministic and cheap</li>
+  </ul>
+
+  <p>
+    Retro Game Eninge's rendering pipeline already ends in a CRT simulation pass,
+    so fog needed to live <em>before</em> that,in the scene pipeline itself.
+  </p>
+
+  <p>
+    The CRT stage should operate on the final degraded signal.
+    Fog is part of the world. I didn't want it to "read" like some kind of bad screen filter. 
+    I'm also constantly thinking about cost and perf, and want something cheap, intentionally so. So I'm thinking that it would run after the main geometry and sprite passes, reading from the scene 
+    color and depth buffers. 
+  </p>
+
+  <p>
+  My core idea was shaping into:
+  </p>
+
+<pre>
+fogFactor = distanceFog * heightFog
+finalColor = lerp(sceneColor, fogColor, fogFactor)
+</pre>
+
+<p>
+    Distance fog is the obvious part.
+    Things further away should fade out.
+  </p>
+
+<pre>
+distFog = saturate((viewZ - fogStart) / (fogEnd - fogStart))
+</pre>
+
+  <p>
+    But what I really wanted was the height part.
+    That horizon haze thing was really cool.
+    It gave games this "the sky is eating the world" effect that I really liked.
+  </p>
+
+<pre>
+heightFog = exp(-(worldY - baseHeight) * heightFalloff)
+</pre>
+
+  <p>
+    Multiply them together, then lerp the final scene color toward your fog color.
+    And boom, you get something that actually makes the environment feel like it exists inside an atmosphere instead of floating in perfect clarity.
+  </p>
+
+</section>
+
+<section>
+  <h2>Implementation: A Fullscreen Fog Pass</h2>
+
+  <p>
+    I started with fog by getting it implemented as a fullscreen pass that runs after main geometry and sprite rendering.
+  </p>
+
+  
+
+  <p>
+    The pass reads:
+  </p>
+
+  <ul>
+    <li>the scene color buffer</li>
+    <li>the depth buffer</li>
+  </ul>
+
+  <p>
+    It reconstructs world position and computes a fog factor using distance fog + height fog.
+  </p>
+
+
+  <p class="devnote">
+    In practice you tune <code>baseHeight</code> like a "fog floor" and <code>heightFalloff</code> as density/falloff.
+  </p>
+
+  <img src="../assets/images/devlog19_fogdistance.png" class="devimage" alt="Distance only fog in Retro Game Engine">
+
+</section>
+
+<section>
+  <h2>Bug #1: Fog Didn’t Exist in Orthographic</h2>
+
+  <p>
+    In perspective cameras, fog looked great.
+  </p>
+
+  <p>
+    In orthographic cameras, fog was gone. Completely.
+  </p>
+
+  <p>
+    That one ended up being frustrating to follow, but after some time I realized I was reconstructing distance assuming perspective depth.
+    Perspective depth is non-linear. Orthographic depth is linear.
+    So the shader was doing the right math for the wrong projection.
+  </p>
+
+  <p>
+    The fix was to explicitly branch fog depth reconstruction based on projection type:
+  </p>
+
+<pre>
+if (projectionType == 0) // perspective
+{
+    viewZ = (nearZ * farZ) / (farZ - depth01 * (farZ - nearZ));
+}
+else // orthographic
+{
+    viewZ = lerp(nearZ, farZ, depth01);
+}
+</pre>
+
+  <p>
+    Projection type is passed through the (new) fog constant buffer.
+  </p>
+
+  <p>
+    This results in fog behaving correctly in both projection modes. That was nice to finally get working, but took some time on the whiteboard first to figure out the math.
+  </p>
+
+  <img src="../assets/images/devlog19_orthofog.png" class="devimage" alt="Distance only fog in Retro Game Engine">
+
+</section>
+
+<section>
+  <h2>Bug #2: Fog Only Worked If a Sky Sphere Existed</h2>
+
+  <p>
+    This one was sneaky because initially all my tests were terrain + sky sphere. 
+  </p>
+
+  <p>
+    Fog worked fine in scenes with a sky sphere great now.
+    But in scenes without one, fog disappeared again. Like nothing at all. Which seemed really odd to me. I started wiring up some tests to get a debug view of the depth buffer. 
+  </p>
+  
+
+  <p>
+    The depth buffer was the giveaway here and it allowed me to identify the issue.
+    If nothing draws into the background, depth stays at the clear value (1.0).
+  </p>
+
+  <!-- Video showing a debug view of depth, while flying through the terrain (black/white depth mode) -->
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog19 Depthdebug.mp4" type="video/mp4">
+  </video>
+
+  <p>
+    And my shader was doing this:
+  </p>
+
+<pre>
+if (depth01 &gt;= 0.999999)
+    return sceneColor;
+</pre>
+
+  <p>
+    I was treating far-plane pixels as "skip fog" which basically means:
+    no sky geometry = no fog. Why did I do this? Because initially, I was trying to not have the distance based camera fog impact the sky when I looked up. 
+    I wanted to "skip" applying fog on top of the sky initially but now I needed it back, just not everywhere.
+  </p>
+
+  <p>
+    The correct behavior is the opposite.
+    Far-plane pixels should be treated as maximum distance fog....but I also don't want the ENTIRE sky to be fogged out.
+  </p>
+
+<pre>
+if (depth01 &gt;= 0.999999)
+{
+    depth01 = 1.0;
+}
+</pre>
+
+  <p>
+    Result: fog appears even when the background is just the clear color.
+    No sky sphere dependency.But now I needed to get 
+  </p>
+</section>
+
+<section>
+  <h2>Bug #3: Constant Buffer Layout Mismatch</h2>
+
+  <p>
+    At one point fog started producing intermittent artifacts:
+  </p>
+
+  <ul>
+    <li>tearing</li>
+    <li>randomly incorrect fog falloff</li>
+    <li>occasionally corrupted world reconstruction</li>
+  </ul>
+
+  <p>
+    This is the kind of bug that makes you question your sanity because it looks like shader math instability.
+    It wasn't.
+  </p>
+
+  <p>
+    The CPU and GPU versions of the fog constant buffer had different layouts.
+  </p>
+
+  <p>
+    On CPU, <code>projectionType</code> was placed before <code>invViewProj</code>.
+    In HLSL, the shader expected it after.
+    So the shader was reading garbage for either the inverse matrix or projection type depending on the frame.
+  </p>
+
+  <p>
+    Fix: lock the layout. Exactly.
+    Final order:
+  </p>
+
+<pre>
+baseHeight
+heightFalloff
+pad2
+
+invViewProj
+
+projectionType
+padProj
+</pre>
+
+  <p>
+    Result: stable world reconstruction and consistent fog behavior.
+  </p>
+   
+   <img src="../assets/images/devlog19_fogterrainon.png" class="devimage" alt="Example of terrain with fog in Retro Game Engine">
+
+  <p class="devnote">
+    If there's one lesson here: GPU bugs that look like math are often just memory alignment pretending to be math.
+  </p>
+</section>
+
+<section>
+  <h2>Bug #4: Fog Ran Even When Fog Was Disabled</h2>
+
+  <p>
+    Even when fog was turned off in scene settings, the fog pass still executed every frame.
+  </p>
+
+  <p>
+    That meant:
+  </p>
+
+  <ul>
+    <li>extra resource transitions</li>
+    <li>a fullscreen draw call</li>
+    <li>depth read per pixel</li>
+    <li>unnecessary buffer work</li>
+  </ul>
+
+  <p>
+    The fix was simple: don’t do work that the scene didn’t ask for.
+  </p>
+
+<pre>
+if (graph.fog.enabled)
+{
+    // run fog pass
+}
+</pre>
+
+  <p>
+    Fog disabled means fog pass skipped entirely.
+    Cleaner pipeline. Less hidden cost.
+  </p>
+</section>
+
+<section>
+  <h2>Fog Is Now Saved With the Scene</h2>
+
+  <p>
+    Fog wasn’t useful if it didn’t serialize.
+  </p>
+
+  <p>
+    Scene save/load was extended with a scene-level fog block:
+  </p>
+
+<pre>
+"fog":
+{
+    "enabled": true,
+    "color": [0.6, 0.7, 0.9],
+    "start": 100,
+    "end": 300,
+    "baseHeight": 0,
+    "heightFalloff": 0.05
+}
+</pre>
+
+  <p>
+    Load code is backward compatible with older scenes that don’t have fog data:
+  </p>
+
+<pre>
+if (o.count("fog") &amp;&amp; o.at("fog").IsObject())
+</pre>
+
+  <p>
+    I also flipped the default: new scenes start with fog disabled.
+    Fog should be intentional, not accidental.
+  </p>
+</section>
+
+<section>
+  <h2>Final Fog System</h2>
+
+  <p>
+    The finished system now supports:
+  </p>
+
+  <h3>Scene-Level Controls</h3>
+  <ul>
+    <li>fog enabled toggle</li>
+    <li>fog color</li>
+    <li>fog start distance</li>
+    <li>fog end distance</li>
+    <li>base height</li>
+    <li>height falloff</li>
+  </ul>
+
+  <h3>Camera Compatibility</h3>
+  <ul>
+    <li>perspective cameras</li>
+    <li>orthographic cameras</li>
+    <li>editor camera</li>
+    <li>gameplay camera</li>
+  </ul>
+
+  <h3>Rendering Behavior</h3>
+  <ul>
+    <li>fog applied after lighting</li>
+    <li>depth-based distance fog</li>
+    <li>world-space height fog</li>
+    <li>stable reconstruction</li>
+    <li>sky-independent fog</li>
+  </ul>
+
+  <h3>Performance</h3>
+  <ul>
+    <li>one fullscreen triangle</li>
+    <li>one depth read per pixel</li>
+    <li>skipped entirely when fog is disabled</li>
+  </ul>
+
+  <!-- Video showing flying through multiple save maps with terrian/fog -->
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog19 Retorenginefogtest02.mp4" type="video/mp4">
+  </video>
+
+</section>
+
+<section>
+  <h2>Why I Like This Upgrade</h2>
+
+  <p>
+    Fog is one of those features that doesn’t feel like a big technical flex,
+    but it changes how everything reads.
+  </p>
+
+  <p>
+    It adds scale.
+    It adds atmosphere.
+    It lets you hide harsh edges and pull the player’s eye where you want it.
+  </p>
+
+  <p>
+    And the best part is it stays aligned with what Retro Game Engine is trying to be:
+    a retro-inspired renderer that behaves like a real pipeline,
+    not a stack of filters.
+  </p>
+
+  <p>
+    Fog now lives where it should:
+    inside the scene render stage, before the CRT simulation.
+  </p>
+</section>
+
+<section>
+  <h2>Now</h2>
+  <!-- Video showing flying through terrain with fog -->
+  <video autoplay loop muted playsinline controls class="devvideo">
+    <source src="../assets/videos/Devlog19 Terrainandfog.mp4" type="video/mp4">
+  </video>
+
+  <p>
+    Scenes can finally have mood.
+  </p>
+
+  <p>
+    The fog system is stable, works in both ortho and perspective cameras, doesn't have any limitations on things like the sky geometry, saves with the scene and is super cheap. So I'm happy.
+  </p>
+
+  <p>
+    Next up I turn towards more editor-heavy tasks: viewport interaction/selection, placement and pivots.
+    Because apparently I enjoy debugging coordinate systems now. The engine is starting to roar to life, I'm excited. 
+  </p>
+
+  
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>
