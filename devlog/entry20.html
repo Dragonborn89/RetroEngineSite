@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 20. Highlight Reel</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 20: Recent Engine Highlights</h1>
+  <h4>March 14th, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<section>
+
+<h2>A Short Break From Deep Dives</h2>
+
+<p>
+The last dev log covered the fog system in RetroEngine and went pretty deep into the technical details behind it.
+</p>
+
+<p>
+Since then I've continued building out the engine, but instead of another huge technical write-up,
+I wanted to do something a little different this time, a quick highlight reel of the biggest things added over the last week or so. 
+</p>
+
+<p>
+These updates touch several parts of the engine: the editor viewport, simulation timing, rendering features, and performance systems.
+Each one pushes the engine a little closer toward feeling like a real tool rather than just a renderer, and narrows the gap between me being able to make a game in this engine. 
+</p>
+
+</section>
+
+
+<section>
+
+<h2>Viewport Selection (AABB Picking)</h2>
+
+<p>
+The editor viewport can now select objects directly using mouse picking.
+</p>
+
+<p>
+This sounds simple, but it required fixing a pretty important piece of math: correctly projecting the mouse position into the viewport when the editor UI is docked and resized.
+Previously the editor assumed the viewport filled the whole window, which meant clicks were offset and selection behaved unpredictably.
+</p>
+
+<p>
+Now the engine converts mouse coordinates into the correct viewport space and performs an AABB intersection test against scene entities.
+This means objects can finally be clicked directly in the viewport instead of only through the SceneGraph panel. I can then drag them around in 3d space with ease.
+</p>
+
+<!-- Video -->
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog20 Viewport Selection01.mp4" type="video/mp4">
+</video>
+
+<p class="devnote">
+Viewport object selection now works correctly even when the editor layout is docked or resized.
+</p>
+
+<!-- Video -->
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog20 Viewport Selection02.mp4" type="video/mp4">
+</video>
+
+</section>
+
+<section>
+
+<h2>Construction Grid & Chunk-Based Level Building</h2>
+
+<p>
+Once viewport selection started working reliably, it unlocked something I had been wanting to push further: fast level construction.
+</p>
+
+<p>
+I expanded the engine’s construction grid and chunk logic so that building levels becomes more like assembling pieces rather than placing individual objects one at a time.
+</p>
+
+<p>
+The idea is simple: create reusable art "vignettes" — small scene chunks like walls, hallways, props, terrain pieces, or structural details — and snap them into place on a construction grid.
+</p>
+
+<p>
+Instead of meticulously positioning every mesh, the engine lets me quickly assemble environments by dropping these chunks into place and letting the grid handle alignment.
+</p>
+
+<!-- Video -->
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog20 Levelbuilding01.mp4" type="video/mp4">
+</video>
+
+<p class="devnote">
+Building a level quickly by snapping reusable scene chunks onto the construction grid.
+</p>
+
+<p>
+This makes iteration dramatically faster.
+You can block out a space in seconds, rearrange pieces, test layouts, and rebuild areas without constantly fighting transforms or precision placement.
+</p>
+
+<p>
+It also encourages building environments out of reusable parts, which fits nicely with the retro mindset where memory and assets were limited and clever reuse was part of the design.
+</p>
+
+<!-- Video -->
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog20 Levelbuilding02.mp4" type="video/mp4">
+</video>
+
+<p class="devnote">
+Reusing art vignettes allows environments to grow quickly while keeping assets manageable.
+</p>
+
+<p>
+Between viewport selection and the construction grid, the editor is starting to feel less like a technical tool and more like a place where levels can actually be built quickly.
+</p>
+
+</section>
+
+
+<section>
+
+<h2>Time as a First-Class System</h2>
+
+<p>
+This is easily the biggest architectural change since the fog system.
+RetroEngine now has a deterministic simulation time system built around a fixed timestep.
+</p>
+
+<p>
+The goal is simple: the engine should be able to pause, rewind, and replay simulation deterministically.
+This opens the door for debugging tools, replay systems, and gameplay features later on.
+</p>
+
+<p>
+Under the hood the engine now tracks simulation ticks and simulation time separately from editor time, allowing the engine to record state history and move forward or backward through it.
+</p>
+
+<p>
+The first test was simple: animated cubes that could rewind and replay in time.
+</p>
+
+<!-- Video -->
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog20 Rewind Cubes.mp4" type="video/mp4">
+</video>
+
+<p class="devnote">
+Rewinding a simple animated scene to validate deterministic simulation behavior.
+</p>
+
+<p>
+Once that worked, the system was wired into input handling and scene updates.
+This means I can now run the engine in game mode, rewind time, replay inputs, and even branch into new timelines by giving different input.
+</p>
+
+<!-- Video -->
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog20 Game Replay.mp4" type="video/mp4">
+</video>
+
+<p class="devnote">
+Gameplay inputs can be replayed or branched from any previous tick.
+</p>
+
+<p>
+The final step was integrating this directly into the editor.
+Now the simulation timeline can be scrubbed and replayed directly while editing the scene.
+</p>
+
+<!-- Video -->
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog20 Editor Rewind.mp4" type="video/mp4">
+</video>
+
+<p class="devnote">
+The editor can rewind and replay simulation while inspecting the scene.
+</p>
+
+<p>
+This system effectively turns the engine into a temporal sandbox, where simulation state can be explored forwards and backwards in time.
+</p>
+
+</section>
+
+
+<section>
+
+<h2>Emissive Texture Support</h2>
+
+<p>
+Previously meshes in RetroEngine could emit light using a constant emissive color.
+That worked, but it meant emissive lighting couldn't vary across a surface.
+</p>
+
+<p>
+Meshes can now use emissive textures, allowing specific parts of a model to glow independently.
+</p>
+
+<p>
+This makes things like neon signs, sci-fi panels, glowing windows, or machinery indicators much easier to build.
+</p>
+
+<!-- Video -->
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog20 Emissive Texture.mp4" type="video/mp4">
+</video>
+
+<p class="devnote">
+Emissive textures allow parts of a mesh to emit light independently instead of using a single color.
+</p>
+
+<p>
+Small upgrade, but it opens up a lot of visual possibilities for scenes.
+</p>
+
+</section>
+
+
+<section>
+
+<h2>GPU Batching and Frustum Culling</h2>
+
+<p>
+The renderer also got a performance pass.
+</p>
+
+<p>
+As scenes grow, the number of draw calls and objects in view increases quickly.
+To keep the engine scalable, two key systems were added:
+</p>
+
+<ul>
+<li>GPU batching</li>
+<li>frustum culling</li>
+</ul>
+
+<p>
+Frustum culling removes objects that are outside the camera view before they ever reach the GPU.
+GPU batching groups compatible objects together to reduce draw call overhead.
+</p>
+
+<p>
+Together these dramatically reduce the amount of work the renderer has to do each frame.
+</p>
+
+<!-- Video -->
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog20 Culling Debug.mp4" type="video/mp4">
+</video>
+
+<p class="devnote">
+Debug views showing which objects are being culled or batched by the renderer.
+</p>
+
+<p>
+I also added debug visualization modes so it's easy to see exactly what the renderer is doing internally.
+</p>
+
+</section>
+
+
+<section>
+
+<h2>Why These Matter</h2>
+
+<p>
+I found each of these features fascinating on their own, but together they really push the engine toward something much more usable.
+</p>
+
+<p>
+The viewport is interactive.  
+The renderer is faster.  
+Materials are more flexible.  
+And the simulation can now move through time.
+</p>
+
+<p>
+That last one in particular changes how the engine can be debugged and how gameplay systems might evolve later.
+</p>
+
+</section>
+
+
+<section>
+
+<h2>Next</h2>
+
+<p>
+The engine is slowly moving out of the "core plumbing" phase and into more editor usability and gameplay systems.
+</p>
+
+<p>
+There's still a lot to build, but the foundation is starting to feel solid.
+</p>
+
+<p>
+RetroEngine is getting there.
+</p>
+
+</section>
+
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>
