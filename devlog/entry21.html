@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 21. Light in the Dust</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 21: Light in the Dust</h1>
+  <h4>March 30th, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<section>
+
+<h2>The Moment It Broke</h2>
+
+<p>
+This one started with something really simple.
+</p>
+
+<p>
+I had a foggy outdoor scene, clouds, atmosphere… all that.
+And I wanted those classic “god rays” cutting through the sky.
+</p>
+
+<p>
+Not realistic volumetrics.
+That very specific retro look where light is actually visible in the air.
+</p>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog21 FoggyWorldsv1.mp4" type="video/mp4">
+</video>
+
+<p>
+And I just couldn’t do it.
+</p>
+
+<p>
+I had lighting.
+I had fog.
+I had emissives.
+</p>
+
+<p>
+But I had no way to make light exist <em>between</em> things.
+</p>
+
+<p>
+That’s when it clicked that the real problem wasn’t outside. While this my original use-case, it wasn't the biggest issue.
+</p>
+
+<p>
+It was interiors.
+</p>
+
+<p>
+Inside, everything felt dead.
+Light would hit surfaces, sure, but you couldn’t see it move through space.
+No beams through windows.
+No shafts cutting across a room.
+No air.
+</p>
+
+<p>
+Older games did this all the time, but in a really stylized way.
+</p>
+
+<p>
+And I had… nothing.
+</p>
+
+</section>
+
+<section>
+
+<h2>The Goal</h2>
+
+<p>
+So I set a pretty clear goal:
+</p>
+
+<ul>
+<li>not physically correct</li>
+<li>not expensive</li>
+<li>not trying to fake real volumetrics</li>
+</ul>
+
+<p>
+I wanted something that:
+</p>
+
+<ul>
+<li>feels like N64 / PS1 era light shafts</li>
+<li>is cheap and deterministic</li>
+<li>can be placed and shaped intentionally</li>
+<li>works indoors and outdoors</li>
+<li>is driven by the artist, not the renderer</li>
+</ul>
+
+<p>
+Basically:
+</p>
+
+<p>
+light as a shape, not a simulation.
+</p>
+
+</section>
+
+<section>
+
+<h2>First Pass: Just Get Something Working</h2>
+
+<p>
+The first version was about as simple as it gets.
+</p>
+
+<p>
+Just a controllable volume:
+</p>
+
+<ul>
+<li>start / end</li>
+<li>rotation</li>
+<li>width / height</li>
+<li>color</li>
+<li>intensity</li>
+</ul>
+
+<img src="../assets/images/Devlog21_LightShaft01.png" class="devimage">
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog21FirstLightShaft.mp4" type="video/mp4">
+</video>
+
+<p>
+It technically worked.
+</p>
+
+<p>
+But it felt like I just dropped a glowing box into the scene.
+</p>
+
+<p>
+No life to it at all.
+</p>
+
+</section>
+
+<section>
+
+<h2>Getting It Into the World</h2>
+
+<p>
+Once I had something showing up, I started pushing it into real scenes.
+</p>
+
+<p>
+Using windows.
+Aligning it with geometry.
+Actually treating it like part of the space instead of an overlay.
+</p>
+
+<img src="../assets/images/Devlog21_outdoorlightshaft.png" class="devimage">
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog21 LightShaftWindows.mp4" type="video/mp4">
+</video>
+
+<p>
+This is where it finally started to feel right.
+</p>
+
+<p>
+Interiors immediately changed.
+</p>
+
+<p>
+Still stylized. Still fake.
+But in a way that actually feels intentional.
+</p>
+
+</section>
+
+<section>
+
+<h2>The Balance Problem</h2>
+
+<p>
+This part took longer than I expected.
+</p>
+
+<p>
+It’s really easy to mess this up.
+</p>
+
+<ul>
+<li>too much movement → looks like modern volumetric noise</li>
+<li>too clean → looks dead and fake</li>
+</ul>
+
+<p>
+There’s a weird middle ground where it feels like “air” without actually simulating anything.
+</p>
+
+<p>
+I ended up adding subtle movement using noise and time.
+Not enough to notice immediately, just enough that it doesn’t feel static.
+</p>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog21 LightShaftFlow01.mp4" type="video/mp4">
+</video>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog21 LightShaftFlow02.mp4" type="video/mp4">
+</video>
+
+<p>
+This is where it stopped feeling like an “effect” and started feeling like mood.
+</p>
+
+</section>
+
+<section>
+
+<h2>Directional Shadows (Finally)</h2>
+
+<p>
+At this point the shafts looked good, but something still felt off.
+</p>
+
+<p>
+Nothing felt grounded.
+</p>
+
+<p>
+So I finally bit the bullet and added a real directional shadow map.
+</p>
+
+<p>
+Light-space matrices, camera fitting, depth pass, sampling in the shader… all that fun stuff.
+</p>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog21 Shadows01.mp4" type="video/mp4">
+</video>
+
+<p>
+And yeah… this helped a lot.
+</p>
+
+<p>
+Things actually sit in the world now.
+</p>
+
+</section>
+
+<section>
+
+<h2>The Real Problem: Color</h2>
+
+<p>
+But even after shadows, something still felt wrong.
+</p>
+
+<p>
+Lighting wasn’t predictable.
+</p>
+
+<p>
+If I pushed color:
+</p>
+
+<ul>
+<li>sometimes it washed everything out</li>
+<li>sometimes it replaced color instead of tinting</li>
+<li>sometimes it just didn’t show up depending on the surface</li>
+</ul>
+
+<p>
+Blue objects ignoring red light was a big one.
+That just feels bad immediately.
+</p>
+
+<p>
+Ambient would sometimes override instead of fill.
+Shadows would just go black.
+</p>
+
+<p>
+At that point I stopped trying to “fix” it and just rethought the whole thing.
+</p>
+
+</section>
+
+<section>
+
+<h2>A Different Lighting Model</h2>
+
+<p>
+I ended up simplifying the model way down.
+</p>
+
+<ul>
+<li>Directional light = what gets hit</li>
+<li>Ambient light = what doesn’t</li>
+</ul>
+
+<p>
+That’s it.
+</p>
+
+<p>
+The shadow map just decides where directional light is removed.
+</p>
+
+<p>
+So instead of:
+</p>
+
+<p>
+light vs black
+</p>
+
+<p>
+you get:
+</p>
+
+<p>
+light color vs shadow color
+</p>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog21 Shadows02.mp4" type="video/mp4">
+</video>
+
+<p>
+Now I can:
+</p>
+
+<ul>
+<li>push warm light with cool shadows</li>
+<li>light interiors without destroying material color</li>
+<li>turn directional off entirely and just use ambient</li>
+</ul>
+
+<p>
+This was the piece that made everything else actually usable.
+</p>
+
+</section>
+
+<section>
+
+<h2>Why This Matters</h2>
+
+<p>
+A lot of modern engines lean heavily into physically-based rendering.
+</p>
+
+<p>
+Which is great if your goal is realism.
+</p>
+
+<p>
+But it also means:
+</p>
+
+<ul>
+<li>lighting is constrained by rules</li>
+<li>color control is indirect</li>
+<li>you end up fighting the system to get something stylized</li>
+</ul>
+
+<p>
+I’ve run into this a lot.
+</p>
+
+<p>
+You try to push color and suddenly you’re debugging albedo response instead of just making something look good.
+</p>
+
+<p>
+That’s not what I want.
+</p>
+
+<p>
+Retro Game Engine is going the opposite direction.
+</p>
+
+<p>
+White light should just look like the material.
+Color should shift predictably.
+Shadows should still have color.
+</p>
+
+<p>
+It’s not physically correct.
+</p>
+
+<p>
+But it’s controllable.
+And honestly that matters more for what I’m trying to build.
+</p>
+
+</section>
+
+<section>
+
+<h2>Where This Leaves Things</h2>
+
+<p>
+For the first time, lighting feels like something I can actually author instead of fight.
+</p>
+
+<p>
+Light shafts give interiors life.  
+Shadows ground the scene.  
+Color actually does what I expect.  
+</p>
+
+<p>
+It all finally lines up.
+</p>
+
+</section>
+
+<section>
+
+<h2>150 Days Later</h2>
+
+<p>
+Today also marks 150 days working on this engine.
+</p>
+
+<p>
+Which feels pretty crazy considering where this started.
+</p>
+
+<p>
+Back then it was just getting pixels on screen.
+</p>
+
+<p>
+Now it’s:
+</p>
+
+<ul>
+<li>a real rendering pipeline</li>
+<li>editor tools</li>
+<li>terrain</li>
+<li>fog</li>
+<li>emissives</li>
+<li>lighting systems that actually feel intentional</li>
+</ul>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Retrogameengine150days.mp4" type="video/mp4">
+</video>
+
+<p class="devnote">
+150 days of building Retro Game Engine: slowly turning into something I can actually make a game in.
+</p>
+
+</section>
+
+<section>
+
+<h2>Next</h2>
+
+<p>
+At this point most of the core pieces are there.
+</p>
+
+<p>
+What’s left is tying everything together into a clean art pipeline and making the tools feel good to use.
+</p>
+
+<p>
+Because I’m already starting to think about the game.
+</p>
+
+<p>
+Not just systems.
+Not just rendering.
+</p>
+
+<p>
+An actual game built in this.
+</p>
+
+<p>
+And honestly….that’s the part I’ve been working toward this whole time.
+</p>
+
+<p>
+Retro Game Engine is getting close.
+</p>
+
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>

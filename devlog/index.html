@@ -41,6 +41,73 @@
 
 <section class="log-list">
 
+<!-- Dev Log 21 -->
+<article>
+  <h2>
+    <a href="entry21.html">🌤️ Dev Log 21 — Light in the Dust</a>
+  </h2>
+  <h4>March 30, 2026</h4>
+  <span class="preview-label">Lighting & Atmosphere</span>
+
+  <p>
+    This update focuses on one of the biggest visual gaps in RetroEngine so far:
+    light that actually feels present in the air.
+  </p>
+
+  <p>
+    While outdoor scenes had fog and atmosphere, interiors still felt flat.
+    Light could hit surfaces, but there was no sense of it moving through space
+    (no beams through windows, no shafts cutting across rooms, and no way to
+    intentionally shape light as part of the environment).
+  </p>
+
+  <p>
+    To solve this, a new light shaft system was introduced.
+    Instead of physically-based volumetrics, the system treats light as a
+    controllable volume — something that can be placed, rotated, scaled,
+    and shaped directly in the scene.
+  </p>
+
+  <p>
+    The goal wasn’t realism, but a stylized approach inspired by older hardware:
+    soft, visible beams that add mood without relying on expensive simulation.
+    Subtle motion was added to keep the shafts from feeling static,
+    finding a balance between completely still and overly noisy.
+  </p>
+
+  <p>
+    Alongside this, the renderer gained a directional shadow map,
+    allowing objects to finally sit correctly in the world.
+    Shadows are generated from a camera-fitted light projection and
+    sampled directly in the lighting pass, grounding both geometry
+    and the new shaft system.
+  </p>
+
+  <p>
+    The biggest change, however, is how lighting color is handled.
+    Instead of relying on physically-based behavior, the system now treats
+    directional light and ambient light as two distinct artistic controls:
+    one defines lit areas, the other defines shadowed areas.
+  </p>
+
+  <p>
+    This allows for predictable color control: warm light with cool shadows,
+    fully ambient-lit interiors, and lighting that enhances materials
+    instead of fighting them.
+  </p>
+
+  <p>
+    This log represents a turning point where lighting in the engine
+    becomes something that can be authored intentionally,
+    not just simulated.
+  </p>
+
+  <img src="../assets/images/Devlog21_LightShaft01.png" alt="Light shaft R&D">
+
+  <a href="entry21.html" class="button">Read Full Log</a>
+  <p class="preview-note">This is just a short summary — click above to read the full log.</p>
+</article>
+
 
 <!-- Dev Log 20 -->
 <article>
