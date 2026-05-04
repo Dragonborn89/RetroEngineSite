@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 22. Momentum</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 22: Momentum</h1>
+  <h4>May 4th, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<section>
+
+<h2>Quick Update</h2>
+
+<p>
+It’s been a bit since the last dev log.
+</p>
+
+<p>
+Not because things slowed down on the engine though, in fact, its the opposite!
+</p>
+
+<p>
+I’ve been deep in building out the engine, and progress has been moving faster than I’ve had time to sit down and document.
+</p>
+
+<p>
+Recently, <strong>80 Level</strong> featured RetroEngine, which brought a lot of new eyes here.
+</p>
+
+<p>
+So instead of trying to backfill multiple posts, this is a snapshot of what’s been built over the past stretch.
+</p>
+
+</section>
+
+<section>
+
+<h2>Viewport Gizmos</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 Gizmos.mp4" type="video/mp4">
+</video>
+
+<p>
+I finally added proper viewport gizmos for translation, rotation, and scale.
+</p>
+
+<p>
+They’re fully interactive in screen space, with axis handles, plane movement, and rotation rings. Snapping can be toggled and configured per mode, so you can move freely or lock to clean increments.
+</p>
+
+<p>
+The important part is that this makes editing feel physical. Instead of typing values into the inspector window like before, you’re just grabbing things and moving them in the world.
+</p>
+
+</section>
+
+<section>
+
+<h2>Terrain Tools</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 NewTerrainTools.mp4" type="video/mp4">
+</video>
+
+<p>
+Terrain got a big upgrade.
+</p>
+
+<p>
+There’s now a defined “play area” that stays flat, with terrain gradually building outward using noise.
+</p>
+
+<p>
+Under the hood, it’s a procedural height system with a center mask that suppresses noise near the player and ramps it back in toward the edges.
+</p>
+
+<p>
+So you get something that works for gameplay, but still looks natural without hand-sculpting everything.
+</p>
+
+</section>
+
+<section>
+
+<h2>Construction Grid Painting</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 ConstructionBrushWork01.mp4" type="video/mp4">
+</video>
+
+<p>
+The construction grid system now supports click-drag painting.
+</p>
+
+<p>
+Before this, placement was one click at a time. Now you can just drag across the grid and paint content down continuously.
+</p>
+
+<p>
+It tracks which cells you’ve already touched during a stroke, so you don’t accidentally double-place things while dragging.
+</p>
+
+<p>
+This alone makes building scenes dramatically faster.
+</p>
+
+</section>
+
+<section>
+
+<h2>Chunk Palette</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 ChunkPalette01.mp4" type="video/mp4">
+</video>
+
+<p>
+Chunks are basically small art vignettes: groups of entities saved and reused as a single unit.
+</p>
+
+<p>
+There’s now a chunk palette with thumbnails, so you can browse visually, pick one, and immediately start placing it.
+</p>
+
+<p>
+Thumbnails load in the background, so you can work while the palette fills in.
+</p>
+
+<p>
+This turns level building into more of a kit-based workflow instead of placing everything manually.
+</p>
+
+</section>
+
+<section>
+
+<h2>Scene Thumbnails</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 SceneThumbnailsWorking01.mp4" type="video/mp4">
+</video>
+
+<p>
+The thumbnail system now extends to full scenes.
+</p>
+
+<p>
+Every time a scene is saved, a thumbnail is automatically generated. You can browse scenes visually and switch between them instantly.
+</p>
+
+<p>
+No more digging through file names, you just click what looks right.
+</p>
+
+</section>
+
+<section>
+
+<h2>Lighting Gradient</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 LightingGradient01.mp4" type="video/mp4">
+</video>
+
+<p>
+Light shafts now support a gradient from near to far.
+</p>
+
+<p>
+Instead of a single color, you can shift color across the depth of the beam: for example, warm near the source and cooler as it fades out.
+</p>
+
+<p>
+It’s a small change, but it adds a lot of control when shaping mood in a scene.
+</p>
+
+</section>
+
+<section>
+
+<h2>Terrain + Mesh Painting</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 NatureScene02.mp4" type="video/mp4">
+</video>
+
+<p>
+This is everything starting to come together.
+</p>
+
+<p>
+Terrain shaping, chunk placement, and mesh painting all working in the same space.
+</p>
+
+<p>
+The mesh painting system lets you paint directly onto surfaces by raycasting into geometry and writing into a texture in real time.
+</p>
+
+<p>
+In this case, blending grass and water layers across the terrain.
+</p>
+
+</section>
+
+<section>
+
+<h2>Chunk Painting</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 TreePaintingFun03.mp4" type="video/mp4">
+</video>
+
+<p>
+This is probably one of the biggest workflow improvements.
+</p>
+
+<p>
+You can now paint chunks directly onto terrain using a brush.
+</p>
+
+<p>
+It handles spacing, randomness, and placement automatically, so you’re not manually placing every tree or prop.
+</p>
+
+<p>
+You just paint and it fills in naturally.
+</p>
+
+</section>
+
+<section>
+
+<h2>Chunk Alignment + Weighting</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 ChunkPaintingAlignment.mp4" type="video/mp4">
+</video>
+
+<p>
+Chunk painting also supports weighting and alignment.
+</p>
+
+<p>
+Each chunk can have a weight (how often it appears), scale range, and whether it aligns to the terrain surface.
+</p>
+
+<p>
+Placement is deterministic based on position, so painting the same area with the same setup gives consistent results.
+</p>
+
+<p>
+It ends up feeling more like sculpting than placing objects.
+</p>
+
+</section>
+
+<section>
+
+<h2>CRT Geometry Warping</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 GeoWarpingSquareLook.mp4" type="video/mp4">
+</video>
+
+<p>
+I added geometry warping to the CRT pipeline.
+</p>
+
+<p>
+This isn’t just a post-process overlay, it’s part of the actual CRT simulation stage, with parameters for curvature, overscan, and convergence.
+</p>
+
+<p>
+It helps push the image away from a flat screen and toward something that actually feels like a display surface.
+</p>
+
+</section>
+
+<section>
+
+<h2>Material Presets + Texture Painting</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog22 TexturePaintingMaterialPresets01.mp4" type="video/mp4">
+</video>
+
+<p>
+Material presets make it possible to reuse full material setups across assets.
+</p>
+
+<p>
+Instead of rebuilding materials every time, you can apply a preset and everything resolves through the asset system.
+</p>
+
+<p>
+Combined with texture painting, which writes directly into a texture on the mesh, this turns material work into something you can iterate on inside the engine.
+</p>
+
+</section>
+
+<section>
+
+<h2>180 Days</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/180Days v5.mp4" type="video/mp4">
+</video>
+
+<p>
+Today also marks 180 days working on RetroEngine.
+</p>
+
+<p>
+That’s honestly a little hard to process.
+</p>
+
+<p>
+This started as getting pixels on screen.
+</p>
+
+<p>
+Now it’s:
+</p>
+
+<ul>
+<li>a full rendering pipeline</li>
+<li>a working editor</li>
+<li>terrain tools</li>
+<li>content workflows</li>
+<li>and something I can actually start building a game in</li>
+</ul>
+
+</section>
+
+<section>
+
+<h2>Going Forward</h2>
+
+<p>
+I’m going to be a bit more intentional with how I post updates.
+</p>
+
+<p>
+Instead of frequent small dev logs, I’ll be sharing larger snapshots like this, focused on showing what’s actually been built.
+</p>
+
+<p>
+Development is the priority, and I’d rather keep momentum than stop constantly to write.
+</p>
+
+<p>
+My goal is to share Retro Game Engine with others in the future, and this is the best way to keep pushing to that goal.
+</p>
+
+<p>
+More soon.
+</p>
+
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>
