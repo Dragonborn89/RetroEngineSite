@@ -255,6 +255,55 @@ section {
   transform: translateY(-4px);
 }
 
+/* --- Latest Dev Log card (home page) --- */
+.latest-log {
+  max-width: 800px;
+  margin: 3em auto;
+  padding: 2em;
+  background: rgba(0, 255, 242, 0.05);
+  border: 1px solid rgba(0, 255, 242, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 255, 242, 0.15);
+  text-align: center;
+}
+
+.latest-log .eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  color: #00fff2;
+  background: rgba(0, 255, 242, 0.1);
+  border: 1px solid rgba(0, 255, 242, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.latest-log h2 {
+  margin-top: 0.6em;
+}
+
+.latest-log video {
+  max-width: 100%;
+  margin: 1.5em auto 0.5em;
+}
+
+.latest-log .button {
+  display: inline-block;
+  margin-top: 1em;
+  padding: 0.75em 1.5em;
+  color: #000;
+  background-color: #6fffd3;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.latest-log .button:hover {
+  background-color: #9ffff0;
+}
+
 .log-list h2 a {
   color: #6fffd3;
   text-shadow: 0 0 10px #00fff2;
@@ -369,4 +418,97 @@ code {
   padding: 2px 6px;
   border-radius: 4px;
   color: #6fffd3;
+}
+
+/* ============================================================= */
+/*  MOBILE (phones, <= 600px)                                    */
+/*  Additive overrides only. Desktop rules above are untouched,  */
+/*  so nothing here can change how the site looks on desktop.    */
+/* ============================================================= */
+@media (max-width: 600px) {
+  main {
+    width: 100%;
+    padding: 1em;
+  }
+
+  header {
+    padding: 1em 0;
+  }
+
+  header h1 {
+    font-size: clamp(1.6rem, 8vw, 2rem);
+    text-shadow: 0 0 5px #00fff2;
+  }
+
+  nav a {
+    margin: 0 8px;
+    font-size: 14px;
+  }
+
+  .hero, .about {
+    padding: 2em 1em;
+    max-width: 100%;
+  }
+
+  /* Left-align body copy for readability; headings and buttons stay centered */
+  .hero p, .about p {
+    text-align: left;
+  }
+
+  h2 {
+    font-size: clamp(1.25rem, 6vw, 1.5rem);
+    margin-top: 1.25em;
+    text-shadow: 0 0 5px #00fff2;
+  }
+
+  h3 {
+    font-size: clamp(1.05rem, 5vw, 1.2rem);
+    margin-top: 1.25em;
+    text-shadow: 0 0 5px #00fff2;
+  }
+
+  p, li {
+    font-size: 16px;
+  }
+
+  h2, h3 {
+    text-wrap: balance;
+  }
+
+  p, li, h1, h2, h3 {
+    overflow-wrap: break-word;
+  }
+
+  .site-age {
+    font-size: 1.2rem;
+    margin-top: -0.5em;
+  }
+
+  video {
+    max-width: 100%;
+    margin: 1.5em auto;
+  }
+
+  img {
+    max-width: 100%;
+    margin: 1.5em auto;
+  }
+
+  .log-list {
+    margin: 2em auto;
+    padding: 0 1em;
+  }
+
+  .log-list article {
+    padding: 1.25em;
+  }
+
+  .latest-log {
+    padding: 1.25em;
+    margin: 2em auto;
+  }
+
+  .latest-log p {
+    text-align: left;
+  }
 }
