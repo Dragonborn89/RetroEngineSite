@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroEngine — Dev Log 23. Signs of Life</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>Dev Log 23: Signs of Life</h1>
+  <h4>July 16th, 2026</h4>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/devlog/">Dev Log</a>
+    <a href="/gallery/">Gallery</a>
+    <a href="/about/">About</a>
+  </nav>
+</header>
+
+<main>
+
+<section>
+
+<h2>The Big One</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_250Days.mp4" type="video/mp4">
+</video>
+
+<p>
+It’s been a while since the last dev log, and that’s the pattern I promised back in log 22. Fewer posts, bigger snapshots, development first.
+</p>
+
+<p>
+So here’s the big one.
+</p>
+
+<p>
+The engine crossed a line I’ve been working toward since the very first frame. It finally has enough systems that I’ve started building an actual game inside it. Not a tech demo. Not a throwaway test scene. A real game.
+</p>
+
+<p>
+There’s a reason for that beyond it being the fun part. The best way to prove an engine is to try to build something real in it. The moment you stop making features and start making a game, the engine stops being able to hide. Every missing piece, every clumsy workflow, every gap shows up right away.
+</p>
+
+<p>
+So that’s what this stretch has been about. A lot of what follows leans more “game” than “engine,” and that’s the point. Building the game is how I’m finding the gaps, and then closing them.
+</p>
+
+<p>
+This log covers everything since the last one, about two and a half months of work, roughly in the order it actually happened.
+</p>
+
+</section>
+
+<section>
+
+<h2>Faking Depth</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_SpatialcompressionExpansion.mp4" type="video/mp4">
+</video>
+
+<p>
+Old games faked depth and scale constantly. The hardware couldn’t draw distant things at full size or detail, so developers cheated the eye to sell a feeling instead of simulating reality. I wanted a tool in that same spirit.
+</p>
+
+<p>
+So I built an effect I’m calling spatial compression. It’s a per-scene control that scales how large geometry appears based on its distance from the camera. Turn it up and a far-off tower looms larger than a correct perspective camera would ever draw it, and a vista suddenly feels grand. Invert it and space stretches out instead, which reads beautifully indoors.
+</p>
+
+<p>
+Under the hood it lives in the vertex shader. For each vertex I measure its distance from the camera, remap that into a zero to one range between a near and a far cutoff, and use it to scale the vertex’s position on screen. It isn’t physically correct, and that’s the whole idea. It’s a deliberate lie, tuned by hand per scene.
+</p>
+
+<p>
+It’s still marked experimental, and I’m learning where it works and where it falls apart. But even now it does something no accurate camera can. It makes a small world feel epic.
+</p>
+
+</section>
+
+<section>
+
+<h2>Making It Run</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_Perfimprovements.mp4" type="video/mp4">
+</video>
+
+<p>
+As scenes got bigger, with streaming terrain, foliage, and painted chunks, I hit the wall every engine hits. It has to stay fast on modest hardware. That isn’t a nice to have for a retro engine, it’s the entire point. It should run great on a potato.
+</p>
+
+<p>
+So I did a focused performance pass. The main wins:
+</p>
+
+<ul>
+<li>Double-buffered the constant buffers, so the CPU can set up the next frame while the GPU is still drawing the current one, instead of the two waiting on each other.</li>
+<li>Added a “fully loaded” flag to every object, so nothing renders until its GPU data has actually finished uploading. That alone killed a whole category of load-time flicker and crashes.</li>
+<li>Fixed a nasty chunk bug where GPU memory could be freed while the GPU was still reading from it. It’s now guarded by a fence, so cleanup waits until the GPU is genuinely done.</li>
+<li>Batched the shadow draw calls, so casting shadows costs a fraction of the commands it used to.</li>
+</ul>
+
+<p>
+In this capture, dense outdoor terrain and foliage is running well past 200 fps, and indoor scenes past 800. I care about this more than any flashy feature. An engine that only runs on a high-end GPU isn’t a retro engine, it’s a museum piece.
+</p>
+
+</section>
+
+<section>
+
+<h2>Shaping the Land</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_Landscapealltools.mp4" type="video/mp4">
+</video>
+
+<p>
+With performance headroom to spend, I pushed the terrain tools. Height painting, cliff surfaces, and level of detail so distant terrain quietly sheds complexity you’d never notice. All of it editable live in the editor, watching the world change through the CRT as I sculpt.
+</p>
+
+<p>
+For the first time I could shape an entire landscape by hand and have it stay fast.
+</p>
+
+</section>
+
+<section>
+
+<h2>A Moment to Look</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_StreamScene.mp4" type="video/mp4">
+</video>
+
+<p>
+And sometimes you just stop and look.
+</p>
+
+<p>
+Rolling hills, a stream, a tower in the distance. This is a scene running live in the engine, straight off the simulated CRT, with nothing added in post.
+</p>
+
+</section>
+
+<section>
+
+<h2>Wind in the Trees</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_CherryTree.mp4" type="video/mp4">
+</video>
+
+<p>
+With the world holding still and running fast, it was time to make it move.
+</p>
+
+<p>
+I started with wind. It’s a procedural effect in the vertex shader. I push each vertex along a wind direction using a wave that rolls across the world over time, and I mask it by height so the base of a tree stays planted while the canopy sways. Every entity can respond to the wind differently, so a heavy trunk barely moves while light leaves flutter.
+</p>
+
+<p>
+The first time that cherry tree swayed on its own, the whole world stopped feeling like a diorama and started feeling alive.
+</p>
+
+</section>
+
+<section>
+
+<h2>The Pipeline Behind It</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_Dancingcubes.mp4" type="video/mp4">
+</video>
+
+<p>
+Wind is great for things that sway, but I wanted real animation. Characters, creatures, hands. For that I built something I’m genuinely proud of, a custom vertex animation pipeline, from Blender all the way to the GPU.
+</p>
+
+<p>
+Here’s the idea. In Blender, I bake an animation into a texture. Every row of the texture is one frame, and every column is one vertex. The pixel stores where that vertex is at that moment in time. At runtime, the vertex shader just reads its position straight out of the texture for the current frame. No skeleton, no bones, no work on the CPU. The animation is pure data, and the GPU does all the lifting.
+</p>
+
+<p>
+This clip is the very first test of that pipeline, a handful of cubes dancing entirely from data baked into a texture.
+</p>
+
+<p>
+Getting there meant writing a few pieces from scratch:
+</p>
+
+<ul>
+<li>A minimal reader for the texture format, with no heavy third party library, just the exact slice of the format I needed.</li>
+<li>A Blender exporter that rebuilds the mesh vertex for vertex exactly the way the engine does, so the two never disagree about which vertex is which.</li>
+<li>Optional per frame normals baked into a second texture, so lighting stays correct as things deform.</li>
+<li>Smooth blending between animation clips, so switching from idle to walk doesn’t pop.</li>
+</ul>
+
+<p>
+There’s a fun constraint hiding in here. The graphics API gives a vertex shader a hard limit on how many data slots it can bind, and this system pushed me right up against it. I’m one slot away from the ceiling, which meant packing data together carefully instead of just adding more. Old hardware forced that kind of discipline all the time. Now I get to feel it too.
+</p>
+
+</section>
+
+<section>
+
+<h2>An Ocean in the Vertex Shader</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_Wavesystem.mp4" type="video/mp4">
+</video>
+
+<p>
+The same idea, moving vertices on the GPU, opened a door I didn’t expect. Water.
+</p>
+
+<p>
+I added a wave mode that displaces a flat grid using Gerstner waves, the classic math behind believable ocean motion. It runs entirely in the vertex shader, rolling and pitching a plain grid into swells in real time.
+</p>
+
+<p>
+One subtle problem showed up in the shadows. The waves moved the surface, but the shadow pass was still drawing the flat, unmoved grid, which caused ugly diagonal banding. The fix was to run the exact same wave math a second time in the shadow pass, so the shadow matches the surface.
+</p>
+
+<p>
+I left the surface lit flat on purpose. It leans into the retro look, and honestly it’s part of the charm. The result is a little extreme, and I love it.
+</p>
+
+</section>
+
+<section>
+
+<h2>Stepping Into the World</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_PlayerController.mp4" type="video/mp4">
+</video>
+
+<p>
+With animation working, including a set of first person hands, I finally built the thing this was all for. A player.
+</p>
+
+<p>
+This clip is me walking, jumping, and bumping into walls in a real scene, in first person, with my own hands in front of me. It’s a first pass controller, but it already feels like a game instead of a camera flying through a diorama.
+</p>
+
+<p>
+The part I want to call out is how the world knows what you can walk on and what you can walk through. Every object in a scene can be flagged two ways. One flag says “you can stand on this,” the other says “this blocks you.” The player checks the ground against everything marked walkable, and slides along anything marked solid. That’s it. No physics engine, no collision meshes to author. As the designer, I just point at a rock and say “ground,” or at a wall and say “solid,” and the world obeys.
+</p>
+
+<p>
+It’s a deliberately simple, hand authored approach, and it fits how I want to build. I’d rather make a hundred fast, clear decisions than wrestle one giant simulation.
+</p>
+
+<p>
+The hands get one more trick. They render in their own pass that ignores the world’s depth, at their own fixed field of view, so they never poke through a wall or clip into a doorway no matter how tight the space.
+</p>
+
+</section>
+
+<section>
+
+<h2>A Torch in Hand</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_Handsocketupdates.mp4" type="video/mp4">
+</video>
+
+<p>
+Once the hands could animate, I wanted them to hold something. A torch, to start.
+</p>
+
+<p>
+The tricky part is that the hands are animated entirely on the GPU, baked into that texture I mentioned. The CPU, which is where the torch actually lives as an object, has no idea where the hand is at any given frame. So I needed a way to hand that information back.
+</p>
+
+<p>
+Instead of reading the animation back off the GPU, which is slow, I bake a second tiny file alongside the animation. For a chosen point on the mesh, a socket, it stores the position and rotation for every single frame. At runtime the engine just looks up the socket for the current frame and places the torch there. It’s a few kilobytes and a simple lookup, and the torch tracks the hand perfectly.
+</p>
+
+<p>
+I authored a socket on each hand, so I can pass the torch from left to right, stow it, and pull it back out. There’s also a little debug gizmo in the editor that draws the sockets while I scrub the animation, which made getting this right far less painful.
+</p>
+
+<p>
+This is the kind of small, purpose built solution I keep reaching for. A big general engine would solve this with a whole skeletal attachment system. Mine is a lookup table and a texture read.
+</p>
+
+</section>
+
+<section>
+
+<h2>The First Interface</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_TorchUI.mp4" type="video/mp4">
+</video>
+
+<p>
+A game needs to talk to the player. So I started building the UI system, and the torch was my first real test.
+</p>
+
+<p>
+In this clip, a torch sits on the wall with a prompt to take it. I pick it up, swap it between hands, stow it, and pull it back out, and the UI keeps up the whole time, telling me what I’m holding and what I can do.
+</p>
+
+<p>
+The text itself is worth a note. I bake fonts into a special kind of texture that stays razor sharp at any size, from a tiny prompt to a big header, without ever going blurry.
+</p>
+
+<p>
+And there’s a lovely constraint. The CRT simulation is unkind to thin lines. Delicate, hairline text simply gets eaten by the glass and the glow. So the UI has to be bold and sit on solid panels to survive being displayed on a simulated CRT. The display isn’t just where the game ends up, it’s a design constraint I get to build around from the start.
+</p>
+
+</section>
+
+<section>
+
+<h2>Surveying the World</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_Mapwork.mp4" type="video/mp4">
+</video>
+
+<p>
+The bigger the world got, the more I needed a way to see it. So the game got a map. And I didn’t want a modern minimap, I wanted something that felt hand drawn, like a page from an explorer’s kit.
+</p>
+
+<p>
+Here’s how it works. When you survey an area, the engine renders the world from straight overhead, then runs it through a shader that treats the terrain’s height as elevation and draws it like a real topographic map. Contour lines follow the hills, slopes get hatched, and the whole thing is washed onto parchment.
+</p>
+
+<p>
+The map isn’t handed to you all at once. As you walk, the game quietly remembers where you’ve been, and only those areas fill in on the page. Everywhere else stays blank parchment with a soft, hand drawn edge, waiting to be discovered. The revealed area is anchored to the actual world, so the edge never shifts or shimmers when you survey again.
+</p>
+
+<p>
+All of this, along with the torches you’ve picked up and your settings, now saves between sessions. The world remembers you.
+</p>
+
+</section>
+
+<section>
+
+<h2>A Relic Worth Drawing</h2>
+
+<video autoplay loop muted playsinline controls class="devvideo">
+  <source src="../assets/videos/Devlog23_Journal.mp4" type="video/mp4">
+</video>
+
+<p>
+This is the newest system, and it’s where a lot of these pieces come together.
+</p>
+
+<p>
+The game has a journal, and it isn’t a menu. It’s an in world book that renders real content, including sketches of the things you find. When you discover a relic, the game draws it, as a pen and ink field sketch, onto the page.
+</p>
+
+<p>
+That sketch isn’t hand painted, it’s generated live. The engine renders the object, then a shader turns it into a drawing. It finds the object’s edges and traces them as ink outlines, shades the form with cross hatching that follows the light, and lays down a soft wash of color. The background dissolves away so the drawing sits cleanly on the paper.
+</p>
+
+<p>
+Here’s the detail I love most. The way the sketch fades at its edges is the exact same hand drawn fade the map uses for unexplored ground. Two completely different systems, the map and the journal, ended up speaking the same visual language, as if the whole world were being recorded by hand in one book. That wasn’t planned. It just happened, because the pieces were built to fit together.
+</p>
+
+</section>
+
+<section>
+
+<h2>250 Days</h2>
+
+<p>
+Somewhere in the middle of all this, RetroEngine quietly passed 250 days.
+</p>
+
+<p>
+I went back and looked at where this started, and it’s a little hard to believe. It began as a single question. Could I simulate a CRT as a real thing, not a filter. That was it.
+</p>
+
+<p>
+Now it’s:
+</p>
+
+<ul>
+<li>a full rendering pipeline with a simulated CRT at the end of it</li>
+<li>a custom animation system running on the GPU</li>
+<li>wind, water, and living scenes</li>
+<li>a first person game you can actually walk around in</li>
+<li>UI, a hand drawn map, and an in world journal</li>
+<li>and a look I’m genuinely proud of</li>
+</ul>
+
+<p>
+250 days ago I was fighting to get a single frame to look right. Now I’m building a game.
+</p>
+
+</section>
+
+<section>
+
+<h2>Going Forward</h2>
+
+<p>
+The goal for the next stretch is simple to say and hard to do. I want to build a small vertical slice of the first game that will live in this engine.
+</p>
+
+<p>
+Not the whole game. A short, complete, polished piece of it, start to finish. Enough to prove that the engine works and that there’s a real game here, not just a beautiful renderer.
+</p>
+
+<p>
+Building that slice is how I’ll find the last gaps, and it’s the thing I most want to show next.
+</p>
+
+<p>
+More soon.
+</p>
+
+</section>
+
+</main>
+
+<footer>
+  <p>© 2026 RetroEngine</p>
+</footer>
+
+</body>
+</html>
